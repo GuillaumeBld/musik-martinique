@@ -1,0 +1,122 @@
+<title>Tambou 16</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{
+  --panel:#1b1a17; --panel-2:#23221e; --well:#121110; --line:#3a3730;
+  --ink:#ece5d6; --ink-dim:#9a9283; --led:#ffb340;
+  --b1:#d94a2b; --b2:#e8862a; --b3:#e5c134; --b4:#ebe4d3;
+  --font-d:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --font-m:"IBM Plex Mono",Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--well);color:var(--ink);font-family:var(--font-d);padding-block:24px;padding-inline:16px;min-height:100vh}
+.machine{max-width:1100px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:10px;box-shadow:0 30px 60px #000c,inset 0 1px 0 #ffffff12;padding:20px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 20px;border-bottom:2px solid var(--line);padding-bottom:12px;margin-bottom:16px}
+h1{margin:0;font-size:44px;font-weight:800;letter-spacing:.04em;line-height:1;text-wrap:balance}
+h1 span{color:var(--b2)}
+.tag{font-family:var(--font-m);font-size:12px;color:var(--ink-dim);letter-spacing:.08em;text-transform:uppercase}
+.transport{display:flex;flex-wrap:wrap;align-items:stretch;gap:12px;margin-bottom:18px}
+.ctl{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:10px 12px;display:flex;flex-direction:column;gap:6px;min-width:150px;flex:1 1 150px}
+.ctl label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-dim);font-weight:700;display:flex;justify-content:space-between}
+.ctl output{font-family:var(--font-m);font-weight:600;color:var(--led);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--b2);margin:0}
+select,button{font:inherit;font-size:16px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer}
+select{width:100%}
+button:hover{border-color:var(--ink-dim)}
+button:focus-visible,select:focus-visible,input:focus-visible,.pad:focus-visible{outline:2px solid var(--led);outline-offset:2px}
+#play{flex:0 0 auto;min-width:130px;font-size:22px;font-weight:800;background:var(--b1);border-color:#0006;color:#fff;box-shadow:inset 0 -3px 0 #0005}
+#play.on{background:#3a9a4c}
+#clear{align-self:stretch}
+.grid{display:grid;grid-template-columns:118px 32px 70px repeat(16,minmax(0,1fr));gap:4px 5px;align-items:center}
+.gh{font-family:var(--font-m);font-size:10px;color:var(--ink-dim);text-align:center;padding-bottom:2px;font-variant-numeric:tabular-nums}
+.gh.cur{color:var(--led)}
+.name{font-size:17px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden}
+.key{font-family:var(--font-m);font-size:10px;color:var(--well);background:var(--ink-dim);border-radius:3px;padding:1px 5px}
+.mute{padding:4px 0;font-size:12px;width:32px;text-align:center}
+.mute.on{background:var(--b1);color:#fff;border-color:transparent}
+.vol{padding:0}
+.pad{height:36px;border-radius:4px;border:1px solid #0008;background:var(--panel-2);cursor:pointer;padding:0;position:relative;box-shadow:inset 0 1px 0 #ffffff10,0 2px 0 #0008}
+.pad::after{content:"";position:absolute;left:50%;top:50%;width:6px;height:6px;border-radius:50%;transform:translate(-50%,-50%);background:#0006}
+.g1 .pad{--band:var(--b1)} .g2 .pad{--band:var(--b2)} .g3 .pad{--band:var(--b3)} .g4 .pad{--band:var(--b4)}
+.pad{--band:var(--b1)}
+.pad.on{background:var(--band);border-color:#0009}
+.pad.on::after{background:#0005}
+.pad.acc{box-shadow:inset 0 0 0 3px #fff9,0 0 10px var(--band);}
+.pad.cur{filter:brightness(1.35);box-shadow:0 0 0 2px var(--led),0 0 12px var(--led)}
+.pad:active{transform:translateY(1px)}
+.row-hit .name{color:var(--led)}
+footer{margin-top:18px;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-wrap:wrap;gap:6px 24px;font-family:var(--font-m);font-size:12px;color:var(--ink-dim)}
+footer b{color:var(--ink);font-weight:600}
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(16,minmax(0,1fr))}
+  .name{grid-column:1/9}.mute{grid-column:9/11;width:auto}.vol{grid-column:11/17}
+  .gh{display:none}
+  .pad{height:28px}
+  h1{font-size:34px}
+}
+@media (prefers-reduced-motion:reduce){.pad,button{transition:none}}
+</style>
+
+<div class="machine">
+<header>
+  <h1>TAMBOU <span>16</span></h1>
+  <div class="tag">Boîte à rythmes · 8 voix · 16 pas · synthèse pure</div>
+</header>
+
+<div class="transport">
+  <button id="play" aria-pressed="false">▶ Play</button>
+  <div class="ctl"><label>Tempo <output id="bpmOut">96</output></label><input type="range" id="bpm" min="60" max="200" value="96"></div>
+  <div class="ctl"><label>Swing <output id="swingOut">0 %</output></label><input type="range" id="swing" min="0" max="60" value="0"></div>
+  <div class="ctl"><label>Volume <output id="masterOut">80</output></label><input type="range" id="master" min="0" max="100" value="80"></div>
+  <div class="ctl"><label for="preset">Pattern</label>
+    <select id="preset">
+      <option value="zouk">Zouk</option><option value="boombap">Boom bap</option><option value="house">House</option><option value="dembow">Dembow</option><option value="empty">Vide</option>
+    </select></div>
+  <button id="clear">Effacer</button>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <span><b>Clic</b> = pas · <b>2e clic</b> = accent · <b>3e clic</b> = off</span>
+  <span><b>Espace</b> = play/stop · <b>1–8</b> = jouer la voix</span>
+  <span>Sons générés par Web Audio, rien à charger.</span>
+</footer>
+</div>
+
+<script>
+const INSTR=[{id:'kick',name:'Kick',key:'1'},{id:'snare',name:'Snare',key:'2'},{id:'clap',name:'Clap',key:'3'},{id:'chh',name:'Hat fermé',key:'4'},{id:'ohh',name:'Hat ouvert',key:'5'},{id:'tom',name:'Tom',key:'6'},{id:'rim',name:'Rim',key:'7'},{id:'cow',name:'Cowbell',key:'8'}];
+const STEPS=16;
+const PRESETS={empty:{},zouk:{kick:[0,6,8,14],snare:[4,12],chh:[0,2,4,6,8,10,12,14],ohh:[14],cow:[0,3,6,10,12],rim:[2,7,11]},boombap:{kick:[0,7,10],snare:[4,12],chh:[0,2,4,6,8,10,12,14],ohh:[10],rim:[14]},house:{kick:[0,4,8,12],clap:[4,12],chh:[2,6,10,14],ohh:[2,6,10,14],rim:[3,11]},dembow:{kick:[0,4,8,12],snare:[3,6,11,14],chh:[0,2,4,6,8,10,12,14],cow:[0,6,8,14]}};
+let S={pattern:{},vols:{},mutes:{},bpm:96,swing:0,master:80};
+for(const i of INSTR){S.pattern[i.id]=Array(STEPS).fill(0);S.vols[i.id]=0.8;S.mutes[i.id]=false;}
+function loadPreset(n){for(const i of INSTR){S.pattern[i.id]=Array(STEPS).fill(0);(PRESETS[n][i.id]||[]).forEach(s=>S.pattern[i.id][s]=1);}if(PRESETS[n].kick)S.pattern.kick[0]=2;render();save();}
+function save(){try{localStorage.setItem('tambou16',JSON.stringify(S))}catch(e){}}
+function load(){try{const j=JSON.parse(localStorage.getItem('tambou16'));if(j&&j.pattern)S=Object.assign(S,j);return true}catch(e){}return false}
+let ctx,masterGain,noiseBuf;
+function ensureAudio(){if(ctx)return;ctx=new (window.AudioContext||window.webkitAudioContext)();const comp=ctx.createDynamicsCompressor();comp.threshold.value=-12;comp.ratio.value=4;masterGain=ctx.createGain();masterGain.gain.value=S.master/100;masterGain.connect(comp);comp.connect(ctx.destination);noiseBuf=ctx.createBuffer(1,ctx.sampleRate*2,ctx.sampleRate);const d=noiseBuf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;}
+function env(t,peak,dur,curve){const g=ctx.createGain();const now=Math.max(t,ctx.currentTime+0.001);g.gain.setValueAtTime(0.0001,now);g.gain.exponentialRampToValueAtTime(peak,now+0.002);g.gain.exponentialRampToValueAtTime(0.0001,now+dur);g.connect(masterGain);return g}
+function noise(t,dur,filterType,freq,q){const s=ctx.createBufferSource();s.buffer=noiseBuf;const f=ctx.createBiquadFilter();f.type=filterType;f.frequency.value=freq;f.Q.value=q||1;s.connect(f);const now=Math.max(t,ctx.currentTime);s.start(now);s.stop(now+dur+0.05);return f}
+function osc(t,type,f0,f1,dur){const o=ctx.createOscillator();o.type=type;const now=Math.max(t,ctx.currentTime);o.frequency.setValueAtTime(f0,now);if(f1)o.frequency.exponentialRampToValueAtTime(f1,now+dur*0.4);o.start(now);o.stop(now+dur+0.05);return o}
+const SYN={kick(t,v){osc(t,'sine',150,42,0.15).connect(env(t,v*1.2,0.5));noise(t,0.02,'lowpass',2000).connect(env(t,v*0.4,0.02))},snare(t,v){noise(t,0.22,'bandpass',1800,0.8).connect(env(t,v*0.9,0.22));osc(t,'triangle',185,120,0.1).connect(env(t,v*0.7,0.1))},clap(t,v){for(let k=0;k<3;k++)noise(t+k*0.011,0.02,'bandpass',1200,1.5).connect(env(t+k*0.011,v*0.8,0.02));noise(t+0.033,0.16,'bandpass',1200,1.5).connect(env(t+0.033,v*0.8,0.16))},chh(t,v){noise(t,0.05,'highpass',7000).connect(env(t,v*0.5,0.05))},ohh(t,v){noise(t,0.35,'highpass',6000).connect(env(t,v*0.45,0.35))},tom(t,v){osc(t,'sine',210,95,0.3).connect(env(t,v,0.35))},rim(t,v){osc(t,'sine',450,0,0.04).connect(env(t,v*0.8,0.04));noise(t,0.02,'highpass',3000).connect(env(t,v*0.5,0.02))},cow(t,v){const g=env(t,v*0.5,0.3);const f=ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=1000;f.connect(g);osc(t,'square',540,0,0.3).connect(f);osc(t,'square',800,0,0.3).connect(f)}};
+function hit(id,t,accent){if(S.mutes[id])return;const v=S.vols[id]*(accent?1:0.65);SYN[id](t,v)}
+let playing=false,step=0,nextT=0,timer,queue=[];
+function tick(){while(nextT<ctx.currentTime+0.12){for(const i of INSTR){const s=S.pattern[i.id][step];if(s)hit(i.id,nextT,s===2)}queue.push({step,t:nextT});const six=60/S.bpm/4;const sw=S.swing/100*0.5;nextT+=step%2===0?six*(1+sw):six*(1-sw);step=(step+1)%STEPS}timer=setTimeout(tick,25)}
+function draw(){if(ctx)while(queue.length&&queue[0].t<=ctx.currentTime){showStep(queue.shift().step)}requestAnimationFrame(draw)}
+requestAnimationFrame(draw);
+function toggle(){ensureAudio();if(ctx.state==='suspended')ctx.resume();playing=!playing;const b=document.getElementById('play');if(playing){step=0;nextT=ctx.currentTime+0.05;tick();b.textContent='■ Stop';b.classList.add('on');b.setAttribute('aria-pressed','true')}else{clearTimeout(timer);queue=[];showStep(-1);b.textContent='▶ Play';b.classList.remove('on');b.setAttribute('aria-pressed','false')}}
+const grid=document.getElementById('grid');
+function render(){grid.innerHTML='';for(let c=0;c<3;c++)grid.appendChild(Object.assign(document.createElement('div'),{className:'gh'}));for(let s=0;s<STEPS;s++){const h=document.createElement('div');h.className='gh';h.dataset.step=s;h.textContent=s%4===0?(s/4+1):'·';grid.appendChild(h)}for(const i of INSTR){const nm=document.createElement('div');nm.className='name';nm.dataset.row=i.id;nm.innerHTML=`<span class="key">${i.key}</span>${i.name}`;grid.appendChild(nm);const m=document.createElement('button');m.className='mute'+(S.mutes[i.id]?' on':'');m.textContent='M';m.title='Muet';m.onclick=()=>{S.mutes[i.id]=!S.mutes[i.id];m.classList.toggle('on');save()};grid.appendChild(m);const v=document.createElement('input');v.type='range';v.className='vol';v.min=0;v.max=100;v.value=S.vols[i.id]*100;v.id='vol-'+i.id;v.title='Volume '+i.name;v.oninput=()=>{S.vols[i.id]=v.value/100;save()};grid.appendChild(v);for(let s=0;s<STEPS;s++){const p=document.createElement('button');p.className='pad';p.dataset.row=i.id;p.dataset.step=s;p.setAttribute('aria-label',`${i.name} pas ${s+1}`);const w=document.createElement('div');w.className='g'+(Math.floor(s/4)+1);w.appendChild(p);grid.appendChild(w);p.onclick=()=>{S.pattern[i.id][s]=(S.pattern[i.id][s]+1)%3;paint(p,S.pattern[i.id][s]);save();if(S.pattern[i.id][s]){ensureAudio();hit(i.id,ctx.currentTime,S.pattern[i.id][s]===2)}};paint(p,S.pattern[i.id][s])}}}
+function paint(p,v){p.classList.toggle('on',v>0);p.classList.toggle('acc',v===2)}
+function showStep(s){grid.querySelectorAll('.cur').forEach(e=>e.classList.remove('cur'));if(s<0)return;grid.querySelectorAll(`[data-step="${s}"]`).forEach(e=>e.classList.add('cur'))}
+document.getElementById('play').onclick=toggle;
+document.getElementById('clear').onclick=()=>loadPreset('empty');
+document.getElementById('preset').onchange=e=>loadPreset(e.target.value);
+const bind=(id,out,fmt,fn)=>{const el=document.getElementById(id);el.oninput=()=>{fn(+el.value);document.getElementById(out).textContent=fmt(+el.value);save()};el.value=fn.init();document.getElementById(out).textContent=fmt(+el.value)};
+bind('bpm','bpmOut',v=>v,Object.assign(v=>S.bpm=v,{init:()=>S.bpm}));
+bind('swing','swingOut',v=>v+' %',Object.assign(v=>S.swing=v,{init:()=>S.swing}));
+bind('master','masterOut',v=>v,Object.assign(v=>{S.master=v;if(masterGain)masterGain.gain.value=v/100},{init:()=>S.master}));
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;if(e.code==='Space'){e.preventDefault();toggle();return}const i=INSTR.find(x=>x.key===e.key);if(i){ensureAudio();if(ctx.state==='suspended')ctx.resume();hit(i.id,ctx.currentTime,true);const n=grid.querySelector(`.name[data-row="${i.id}"]`);n.classList.add('row-hit');setTimeout(()=>n.classList.remove('row-hit'),120)}});
+if(!load())loadPreset('zouk');else render();
+</script>
