@@ -1,25 +1,55 @@
 # Musik Martinique
 
-Boîte à rythmes Web Audio synthèse. Tambou 16 – machine 8 voix, 16 pas.
+Boîte à rythmes martiniquaise, synthèse Web Audio pure — aucun échantillon à télécharger.
 
-## Features
+Onze timbres traditionnels sont fabriqués en direct par la Web Audio API (oscillateurs,
+bruit filtré, enveloppes percussives), groupés par formation d'origine.
 
-- 8 instruments : kick, snare, clap, hi-hat fermé/ouvert, tom, rim, cowbell
-- 16-step sequencer avec grille tactile
-- Patterns prêts : zouk, boombap, house, dembow
-- Contrôles : tempo (60–200 BPM), swing, volume maître
-- Synthèse pure Web Audio (oscillateurs + bruit + filtres)
-- Persistence localStorage
+## Instruments
+
+**Bèlè, chouval bwa, bal**
+
+- `tanbouGrave` — Tanbou bèlè : fût de lattes de tonneau de rhum, peau de cabri, frappé à la main
+- `tanbouAigu` — Tanbou répondeur : phalanges sur le bord de la peau
+- `tambourBass` — Tambour di bass
+- `debonda` — Tanbou débonda, tambour à deux faces du chouval bwa
+- `tibwa` — deux baguettes de bois frappées sur le fût, le tempo de base du bèlè
+- `chacha` — calebasse séchée remplie de graines
+
+**Carnaval — groupes à pied**
+
+- `baril` — Tanbou baril, fût de récupération, plus clair et plus mordant que le tanbou bèlè
+- `siyak` — grande râpe de bois ou de métal grattée à la baguette
+- `cloche` — métal de parade
+- `lanbi` — Konn lanbi, conque servant autrefois de signal
+- `cuivres` — trombone de défilé
+
+## Rythmes
+
+Bèlè (2 temps), Beliyà / Gran bèlè (3 temps), Danmyé / Ladja, Chouval bwa, Biguine,
+Mazouk créole (3 temps), Zouk, Vidé / Karnaval, Groupe à pied.
+
+La grille s'adapte à la mesure : 16 pas en deux temps, 12 pas en trois temps
+(beliyà, gran bèlè et mazouk sont à trois temps).
+
+## Commandes
+
+- `Espace` — lecture / pause
+- clic sur une case — activer et pré-écouter
+- `M` sur une piste — couper
+- tempo, swing, volume général, volume et sourdine par piste
+
+## Portée
+
+Les timbres sont des synthèses qui cherchent le comportement des instruments, pas des
+enregistrements. Les motifs sont des interprétations stylistiques, pas des transcriptions
+du répertoire traditionnel.
 
 ## Deploy
 
-Déployé via Dokploy à `rythme.madinina.cloud`
+Nginx sert `site/` en statique. Déployé via Dokploy sur `rythme.madinina.cloud`.
 
-**Clavier**
-- Espace = play/stop
-- 1–8 = jouer voix
-- Clic pad = cycles (off → note → accent)
-
----
-
-QualIA · Synthèse Caribéenne
+```sh
+docker build -t musik-martinique .
+docker run --rm -p 8080:80 musik-martinique
+```
