@@ -139,6 +139,18 @@
 
   .spacer { flex: 1 1 auto; }
 
+  .audioState {
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: var(--accent-2);
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    padding: 4px 10px;
+    white-space: nowrap;
+  }
+
+  .audioState.ok { color: #7fc8b0; }
+
   select, .ghost {
     font: inherit;
     font-size: 13px;
@@ -314,6 +326,7 @@
 
   <div class="transport">
     <button class="play" id="play">▶ Lecture</button>
+    <span class="audioState" id="audioState">audio : en attente</span>
 
     <label class="field">Tempo <input type="range" id="tempo" min="50" max="200" step="1" value="96"><output id="tempoOut">96 BPM</output></label>
     <label class="field">Swing <input type="range" id="swing" min="0" max="60" step="1" value="0"><output id="swingOut">0 %</output></label>
@@ -527,6 +540,7 @@
 
   const ui = {
     play: document.getElementById('play'),
+    audioState: document.getElementById('audioState'),
     grid: document.getElementById('grid'),
     nums: document.getElementById('nums'),
     preset: document.getElementById('preset'),
@@ -553,6 +567,7 @@
   let ctx = null;
   let master = null;
   let noiseBuffer = null;
+  let silentFrameDone = false;
   const trackGain = {};
 
   let playing = false;
@@ -595,6 +610,58 @@
       gain.connect(master);
       trackGain[track.id] = gain;
     }
+  }
+
+  /**
+   * Joue un échantillon silencieux dans la destination.
+   * Safari sur iOS ne débloque la sortie qu'après la lecture effective d'une source
+   * pendant le geste ; une trame inaudible suffit et ne se déclenche qu'une fois.
+   */
+  function unlockSilently() {
+    if (silentFrameDone || !ctx) return;
+    silentFrameDone = true;
+    const src = ctx.createBufferSource();
+    src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+    src.connect(ctx.destination);
+    src.start(0);
+  }
+
+  /**
+   * Crée le contexte si besoin et le fait passer en marche.
+   * Les navigateurs ne l'autorisent que pendant un geste de l'utilisateur : tant qu'il
+   * reste suspendu, aucune note ne sort et l'horloge audio n'avance pas.
+   * @returns {Promise<boolean>} vrai si le contexte tourne à l'issue de l'appel
+   */
+  function unlockAudio() {
+    ensureAudio();
+    if (ctx.state === 'running') {
+      unlockSilently();
+      updateAudioState();
+      return Promise.resolve(true);
+    }
+    return ctx.resume().then(
+      () => {
+        unlockSilently();
+        updateAudioState();
+        return ctx.state === 'running';
+      },
+      () => {
+        updateAudioState();
+        return false;
+      },
+    );
+  }
+
+  /** Reflète l'état réel de la sortie audio, pour que le silence ne soit jamais inexpliqué. */
+  function updateAudioState() {
+    if (!ctx) {
+      ui.audioState.textContent = 'audio : en attente';
+      ui.audioState.classList.remove('ok');
+      return;
+    }
+    const running = ctx.state === 'running';
+    ui.audioState.textContent = running ? 'audio : actif' : 'audio : bloqué — cliquez';
+    ui.audioState.classList.toggle('ok', running);
   }
 
   /**
@@ -962,8 +1029,7 @@
    * @param {string} trackId piste à déclencher
    */
   function preview(trackId) {
-    ensureAudio();
-    if (ctx.state === 'suspended') ctx.resume();
+    unlockAudio();
     trigger(trackId, ctx.currentTime + 0.02, 1);
   }
 
@@ -980,6 +1046,10 @@
   }
 
   function scheduler() {
+    // Un contexte réveillé tardivement laisse l'échéance dans le passé : sans ce garde-fou
+    // la boucle rattraperait d'un coup tous les pas écoulés.
+    if (nextTime < ctx.currentTime) nextTime = ctx.currentTime + 0.02;
+
     while (nextTime < ctx.currentTime + SCHEDULE_AHEAD) {
       const swing = (Number(ui.swing.value) / 100) * secondsPerStep() * 0.5;
       const when = nextTime + (step % 2 === 1 ? swing : 0);
@@ -1006,8 +1076,8 @@
   }
 
   function start() {
-    ensureAudio();
-    if (ctx.state === 'suspended') ctx.resume();
+    // Le réveil est asynchrone : l'échéance est fixée à la reprise, dans la boucle, pas ici.
+    unlockAudio();
 
     playing = true;
     step = 0;
@@ -1201,6 +1271,12 @@
 
     ui.play.addEventListener('click', toggle);
 
+    // Tout premier geste sur la page tente le réveil, sans attendre le bouton Lecture :
+    // c'est la seule fenêtre où le navigateur autorise la sortie audio.
+    for (const type of ['pointerdown', 'touchstart', 'keydown']) {
+      document.addEventListener(type, () => unlockAudio(), { capture: true });
+    }
+
     ui.tempo.addEventListener('input', () => {
       ui.tempoOut.textContent = ui.tempo.value + ' BPM';
     });
@@ -1237,6 +1313,7 @@
 
     ui.volOut.textContent = Math.round(Number(ui.vol.value) * 100) + ' %';
     ui.swingOut.textContent = ui.swing.value + ' %';
+    updateAudioState();
   }
 
   init();
