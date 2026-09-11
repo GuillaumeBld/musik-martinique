@@ -156,6 +156,22 @@
 
   .audioState.ok { color: #7fc8b0; }
 
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
+  .segBtn {
+    font: inherit;
+    font-size: 12px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--dim);
+    background: var(--panel-2);
+    border: none;
+    padding: 8px 12px;
+    cursor: pointer;
+  }
+  .segBtn + .segBtn { border-left: 1px solid var(--line); }
+  .segBtn[aria-pressed="true"] { color: #1a1108; background: var(--accent); }
+  .segBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
   select, .ghost {
     font: inherit;
     font-size: 13px;
@@ -396,12 +412,16 @@
   <header>
     <h1>Boîte à <span>rythme</span> — Matinik</h1>
     <p>Percussions martiniquaises synthétisées en direct : bèlè, chouval bwa, biguine, mazouk, les groupes à pied du carnaval, et le bouyon.<br>
-       Aucun échantillon à télécharger — les quatorze timbres sont fabriqués par la Web Audio API.</p>
+       Quatorze timbres : de vrais enregistrements pour les peaux, le bois et le métal, la Web Audio API pour le reste.</p>
   </header>
 
   <div class="transport">
     <button class="play" id="play">▶ Lecture</button>
     <span class="audioState" id="audioState">audio : en attente</span>
+    <span class="seg" role="group" aria-label="Source des sons">
+      <button type="button" class="segBtn" id="modeSamples" aria-pressed="true">Échantillons</button>
+      <button type="button" class="segBtn" id="modeSynth" aria-pressed="false">Synthèse</button>
+    </span>
 
     <label class="field">Tempo <input type="range" id="tempo" min="50" max="200" step="1" value="96"><output id="tempoOut">96 BPM</output></label>
     <label class="field">Swing <input type="range" id="swing" min="0" max="60" step="1" value="0"><output id="swingOut">0 %</output></label>
@@ -443,7 +463,7 @@
       <br>
       <strong>Le carnaval.</strong> Dans un <em>groupe à pied</em> — l'orchestre de rue des vidés — la base est le tambour, souvent un <em>baril</em> de récupération, plus clair et plus mordant que le tanbou bèlè. S'y ajoutent le <em>ti-bwa</em>, le <em>cha-cha</em>, la <em>cloche</em>, le <em>siyak</em> (une grande râpe de bois ou de métal que l'on gratte d'une baguette), la <em>conque de lambi</em> qui servait autrefois de signal, et selon les groupes des <em>cuivres</em> — trompette et trombone.
       <br>
-      <strong>Ce que ce n'est pas :</strong> des enregistrements. Chaque timbre est une synthèse qui cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
+      <strong>Deux sources de son.</strong> En mode <em>Échantillons</em>, les peaux, le bois, la cloche et le kit bouyon jouent de vrais enregistrements (domaine public, CC0, Freesound via la banque de Sonic Pi) : une tabla ralentie tient le rôle du tanbou, des toms celui du débonda et du baril. Chacha, siyak, lanbi et cuivres restent synthétisés. En mode <em>Synthèse</em>, tout est fabriqué par la Web Audio API : chaque timbre cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
     </div>
   </footer>
 </div>
@@ -777,6 +797,8 @@
     vol: document.getElementById('vol'),
     volOut: document.getElementById('volOut'),
     dit: document.getElementById('dit'),
+    modeSamples: document.getElementById('modeSamples'),
+    modeSynth: document.getElementById('modeSynth'),
     saveForm: document.getElementById('saveForm'),
     saveName: document.getElementById('saveName'),
     saveBtn: document.getElementById('saveBtn'),
@@ -840,6 +862,7 @@
       gain.connect(master);
       trackGain[track.id] = gain;
     }
+    decodeAllSamples();
   }
 
   /**
@@ -1312,6 +1335,94 @@
     }
   }
 
+  // ---------------------------------------------------------------- échantillons
+
+  /**
+   * Enregistrements (CC0, Freesound via Sonic Pi) par piste : plusieurs prises par instrument,
+   * tirées au hasard à chaque coup, avec un taux de lecture qui rapproche l'instrument
+   * enregistré de l'instrument visé (une tabla ralentie sonne comme un fût plus grand).
+   * `cut` limite la durée des sons longs (cymbale) pour garder un coup net.
+   * Les pistes absentes ici restent en synthèse : bruit et souffle y sont plus vrais.
+   */
+  const SAMPLES = {
+    tanbouGrave: { files: ['tabla_ghe1', 'tabla_ghe3', 'tabla_ghe5'], rate: 0.72, gain: 1.4 },
+    tanbouAigu:  { files: ['tabla_na', 'tabla_tun1', 'tabla_tun2', 'tabla_te1'], rate: 0.9, gain: 1.0 },
+    tambourBass: { files: ['drum_bass_hard'], rate: 0.8, gain: 1.3 },
+    debonda:     { files: ['drum_tom_lo_soft', 'drum_tom_lo_hard'], rate: 1.05, gain: 1.0 },
+    tibwa:       { files: ['elec_wood', 'tabla_ke1'], rate: 1.35, gain: 0.8, cut: 0.18 },
+    baril:       { files: ['drum_tom_hi_hard'], rate: 1.15, gain: 1.0 },
+    cloche:      { files: ['drum_cowbell'], rate: 1.0, gain: 0.8 },
+    kickBouyon:  { files: ['bd_808'], rate: 1.0, gain: 1.3 },
+    snareBouyon: { files: ['sn_dolf'], rate: 1.0, gain: 0.9 },
+    contretemps: { files: ['drum_cymbal_open'], rate: 1.2, gain: 0.6, cut: 0.32 },
+  };
+
+  /** @type {Record<string, ArrayBuffer>} fichiers téléchargés, en attente du contexte audio */
+  const sampleBytes = {};
+  /** @type {Record<string, AudioBuffer>} échantillons décodés, prêts à jouer */
+  const sampleBuffers = {};
+  let sampleMode = 'samples';
+  const MODE_KEY = 'musik-martinique.mode';
+
+  /** Télécharge les fichiers dès l'ouverture ; le décodage attend le premier geste. */
+  function fetchSamples() {
+    const names = new Set();
+    for (const spec of Object.values(SAMPLES)) for (const f of spec.files) names.add(f);
+    for (const name of names) {
+      fetch('samples/' + name + '.mp3', { cache: 'force-cache' })
+        .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
+        .then((bytes) => { sampleBytes[name] = bytes; if (ctx) decodeSample(name); })
+        .catch(() => { /* fichier manquant : la piste restera en synthèse */ });
+    }
+  }
+
+  function decodeSample(name) {
+    if (sampleBuffers[name] || !sampleBytes[name]) return;
+    ctx.decodeAudioData(sampleBytes[name].slice(0))
+      .then((buffer) => { sampleBuffers[name] = buffer; })
+      .catch(() => { delete sampleBytes[name]; });
+  }
+
+  function decodeAllSamples() {
+    for (const name of Object.keys(sampleBytes)) decodeSample(name);
+  }
+
+  /**
+   * Joue un enregistrement de la piste, s'il est prêt.
+   * @returns {boolean} faux si aucun échantillon n'est disponible (la synthèse prend le relais)
+   */
+  function playSample(trackId, t, out, v) {
+    const spec = SAMPLES[trackId];
+    if (!spec) return false;
+    const ready = spec.files.filter((f) => sampleBuffers[f]);
+    if (!ready.length) return false;
+
+    const src = ctx.createBufferSource();
+    src.buffer = sampleBuffers[ready[Math.floor(Math.random() * ready.length)]];
+    // Un coup léger est aussi un peu plus mat : gain et hauteur baissent ensemble.
+    src.playbackRate.value = detune(spec.rate * (0.96 + v * 0.04), 0.05);
+
+    const g = ctx.createGain();
+    if (spec.cut) {
+      g.gain.setValueAtTime(v * spec.gain, t);
+      g.gain.setValueAtTime(v * spec.gain, t + spec.cut * 0.7);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + spec.cut);
+      src.stop(t + spec.cut + 0.02);
+    } else {
+      g.gain.value = v * spec.gain;
+    }
+    src.connect(g).connect(out);
+    src.start(t);
+    return true;
+  }
+
+  function setMode(mode) {
+    sampleMode = mode;
+    ui.modeSamples.setAttribute('aria-pressed', String(mode === 'samples'));
+    ui.modeSynth.setAttribute('aria-pressed', String(mode === 'synth'));
+    try { localStorage.setItem(MODE_KEY, mode); } catch (e) { /* sans mémoire */ }
+  }
+
   const VOICES = {
     kickBouyon,
     snareBouyon,
@@ -1341,7 +1452,9 @@
    */
   function trigger(trackId, t, velocity) {
     ensureAudio();
-    VOICES[trackId](Math.max(t, ctx.currentTime), trackGain[trackId], velocity);
+    const when = Math.max(t, ctx.currentTime);
+    if (sampleMode === 'samples' && playSample(trackId, when, trackGain[trackId], velocity)) return;
+    VOICES[trackId](when, trackGain[trackId], velocity);
   }
 
   /**
@@ -1818,6 +1931,13 @@
 
     ui.saveForm.addEventListener('submit', saveShared);
     loadShared();
+
+    ui.modeSamples.addEventListener('click', () => setMode('samples'));
+    ui.modeSynth.addEventListener('click', () => setMode('synth'));
+    let savedMode = 'samples';
+    try { savedMode = localStorage.getItem(MODE_KEY) === 'synth' ? 'synth' : 'samples'; } catch (e) { /* sans mémoire */ }
+    setMode(savedMode);
+    fetchSamples();
   }
 
   init();

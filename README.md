@@ -68,6 +68,17 @@ page et se recharge d'un clic (mesure, tempo, swing, cases).
 Le carnet est un fichier JSON sur le volume `patterns` (`/data/patterns.json`). Il n'y a
 ni compte ni suppression : c'est un cahier ouvert.
 
+## Sons : échantillons ou synthèse
+
+Interrupteur dans la barre de commandes. En mode **Échantillons** (défaut), dix pistes jouent
+de vrais enregistrements (`site/samples/*.mp3`, mono, 96 kb/s, moins de 1,2 s) : tablas pour
+les tanbou, toms pour débonda et baril, cowbell, 808 et caisse claire pour le bouyon, cymbale
+ouverte pour le contretemps. Plusieurs prises par instrument, tirées au hasard, avec un taux de
+lecture ajusté. Chacha, siyak, lanbi et cuivres restent synthétisés (bruit et souffle).
+
+Origine des fichiers : banque de Sonic Pi (`etc/samples`), échantillons Freesound placés dans
+le domaine public (CC0). Conversion : `ffmpeg -t 1.2 -ac 1 -ar 44100 -b:a 96k`.
+
 ## Portée
 
 Les timbres sont des synthèses qui cherchent le comportement des instruments, pas des
