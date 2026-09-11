@@ -1,0 +1,26 @@
+# Déploiement sur VPS1 derrière Traefik (réseau externe traefik_proxy, résolveur ACME "le").
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    volumes:
+      - patterns:/data
+    networks:
+      - traefik_proxy
+    expose:
+      - "80"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.musik.rule=Host(`rythme.madinina.cloud`)"
+      - "traefik.http.routers.musik.entrypoints=websecure"
+      - "traefik.http.routers.musik.tls.certresolver=le"
+      - "traefik.http.routers.musik-http.rule=Host(`rythme.madinina.cloud`)"
+      - "traefik.http.routers.musik-http.entrypoints=web"
+      - "traefik.http.services.musik.loadbalancer.server.port=80"
+
+volumes:
+  patterns:
+
+networks:
+  traefik_proxy:
+    external: true

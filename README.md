@@ -32,12 +32,29 @@ Mazouk créole (3 temps), Zouk, Vidé / Karnaval, Groupe à pied.
 La grille s'adapte à la mesure : 16 pas en deux temps, 12 pas en trois temps
 (beliyà, gran bèlè et mazouk sont à trois temps).
 
+Le tibwa porte la formule de base du bèlè, **tak pi tak pi tak tak** : dans les motifs, `x`
+est un coup fort (tak) et `p` un coup léger (pi). La formule chantée s'affiche sous les
+commandes quand un style la porte.
+
 ## Commandes
 
 - `Espace` — lecture / pause
-- clic sur une case — activer et pré-écouter
+- clic sur une case — tak (fort), second clic — pi (léger), troisième — silence ; chaque clic pré-écoute
+- touches `1` … `0` `-` — jouer les pistes au clavier (`Maj` pour un coup léger)
 - `M` sur une piste — couper
 - tempo, swing, volume général, volume et sourdine par piste
+- le motif courant reste en mémoire dans le navigateur (localStorage)
+
+## Carnet partagé
+
+Un motif peut être enregistré sous un nom ; il devient visible par tous les visiteurs de la
+page et se recharge d'un clic (mesure, tempo, swing, cases).
+
+- `GET /api/patterns` — liste, le plus récent en premier (500 au maximum, les plus anciens sortent)
+- `POST /api/patterns` — `{ name, steps (12|16), bpm, swing, pattern: { piste: [0|1|2, …] } }`
+
+Le carnet est un fichier JSON sur le volume `patterns` (`/data/patterns.json`). Il n'y a
+ni compte ni suppression : c'est un cahier ouvert.
 
 ## Portée
 
@@ -45,11 +62,16 @@ Les timbres sont des synthèses qui cherchent le comportement des instruments, p
 enregistrements. Les motifs sont des interprétations stylistiques, pas des transcriptions
 du répertoire traditionnel.
 
-## Deploy
+## Déploiement
 
-Nginx sert `site/` en statique. Déployé via Dokploy sur `rythme.madinina.cloud`.
+`server.py` (Python 3, bibliothèque standard seulement) sert `site/` et l'API. Sur VPS1, le
+`docker-compose.yml` du dépôt branche le conteneur derrière Traefik sous
+`rythme.madinina.cloud` (clone dans `/root/musik-martinique-deploy/repo`).
 
 ```sh
-docker build -t musik-martinique .
-docker run --rm -p 8080:80 musik-martinique
+# en local
+PATTERNS_FILE=/tmp/patterns.json PORT=8080 python3 server.py
+
+# sur VPS1, après un push
+cd /root/musik-martinique-deploy/repo && git pull && docker compose up -d --build
 ```

@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Boîte à rythme — sonorités martiniquaises</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800&display=swap">
 <style>
   :root {
     --bg: #100d0b;
@@ -36,10 +38,13 @@
 
   header h1 {
     margin: 0;
-    font-size: 22px;
-    letter-spacing: .12em;
+    font-family: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+    font-size: 40px;
+    line-height: 1;
+    letter-spacing: .06em;
     text-transform: uppercase;
-    font-weight: 700;
+    font-weight: 800;
+    text-wrap: balance;
   }
 
   header h1 span { color: var(--accent); }
@@ -277,7 +282,77 @@
     box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .32);
   }
 
-  .cell.on.ghost { opacity: .6; }
+  /* Coup léger (« pi ») : la couleur n'occupe que le bas de la case, comme un coup retenu. */
+  .cell.on.light {
+    background: linear-gradient(to top, var(--c) 0 42%, var(--cell) 42%);
+    border-color: var(--c);
+    box-shadow: none;
+  }
+
+  .track.hit .name { color: var(--accent); }
+  .track.hit .name i { transform: scale(1.6); }
+
+  .track .name kbd { margin-left: auto; opacity: .55; font-size: 10px; }
+
+  .dit {
+    margin: 0 0 12px;
+    font-family: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: .08em;
+    color: var(--accent);
+    min-height: 1.2em;
+  }
+  .dit:empty { display: none; }
+
+  .carnet {
+    margin-top: 18px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+  }
+  .carnet h2 {
+    margin: 14px 0 8px;
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--dim);
+  }
+  .saveRow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .saveRow label { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; }
+  .saveRow input {
+    font: inherit;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: 9px 12px;
+    min-width: 220px;
+  }
+  .saveRow input:focus-visible, .ghost:focus-visible, .cell:focus-visible, .play:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .saveMsg { font-size: 12.5px; color: #7fc8b0; }
+  .saveMsg.err { color: var(--accent-2); }
+
+  .shared { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .shared li button {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    color: var(--text);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+    display: grid;
+    gap: 3px;
+  }
+  .shared li button:hover { border-color: var(--accent); }
+  .shared li b { font-size: 14px; }
+  .shared li small { color: var(--dim); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+  .shared .empty { color: var(--dim); font-size: 12.5px; }
 
   .cell.cursor {
     outline: 2px solid rgba(255, 255, 255, .55);
@@ -341,6 +416,8 @@
     <button class="ghost" id="clear">Effacer</button>
   </div>
 
+  <p class="dit" id="dit"></p>
+
   <div class="board">
     <div class="ruler">
       <div></div><div></div><div></div>
@@ -349,8 +426,18 @@
     <div id="grid"></div>
   </div>
 
+  <section class="carnet" aria-labelledby="carnetTitle">
+    <form class="saveRow" id="saveForm">
+      <label>Nom du motif <input id="saveName" maxlength="40" placeholder="ex. bèlè de Sainte-Marie" autocomplete="off" required></label>
+      <button class="ghost" type="submit" id="saveBtn">Enregistrer pour tous</button>
+      <span class="saveMsg" id="saveMsg" aria-live="polite"></span>
+    </form>
+    <h2 id="carnetTitle">Motifs partagés — visibles par tous ceux qui ouvrent la page</h2>
+    <ul class="shared" id="shared"><li class="empty">Chargement…</li></ul>
+  </section>
+
   <footer>
-    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case pour l'activer (et l'écouter) &nbsp;·&nbsp; <kbd>M</kbd> sur une piste pour la couper &nbsp;·&nbsp; les appuis de temps sont accentués automatiquement.
+    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case : <em style="color:var(--accent);font-style:normal">tak</em> (fort), second clic : <em style="color:var(--accent);font-style:normal">pi</em> (léger), troisième : silence &nbsp;·&nbsp; touches <kbd>1</kbd>…<kbd>0</kbd> <kbd>-</kbd> jouent les pistes (<kbd>Maj</kbd> pour un coup léger) &nbsp;·&nbsp; <kbd>M</kbd> coupe une piste &nbsp;·&nbsp; le motif reste en mémoire dans ce navigateur.
     <div class="note">
       <strong>D'où viennent ces sons.</strong> Le <em>tanbou bèlè</em> a un fût de lattes de tonneau de rhum et une peau de cabri ; sa sonorité recherchée est « proche de la terre, un peu sourde », et le talon de pied frotté sur la peau le rend mélodique — d'où les légers glissements de hauteur d'un coup à l'autre. Les <em>tibwa</em> sont deux baguettes de bois frappées sur le fût : elles donnent le tempo de base, le tambour se contente d'accentuer et de répondre. Le <em>chacha</em> est une calebasse séchée remplie de graines, ou une boîte de fer-blanc. Le <em>tanbou débonda</em> et le <em>ti-bwa</em> en bambou viennent du chouval bwa. Le <em>beliyà</em> et le <em>gran bèlè</em> sont les deux formes de bèlè à trois temps, comme la mazouk — d'où la grille à 12 pas.
       <br>
@@ -385,17 +472,34 @@
 
   /**
    * Motifs par style. `steps` vaut 12 (trois temps) ou 16 (deux temps), `bpm` le tempo d'usage.
-   * Chaque ligne fait exactement `steps` caractères ; `x` marque un coup.
+   * Chaque ligne fait exactement `steps` caractères : `x` coup fort (tak), `p` coup léger (pi).
+   * `dit` est la formule chantée du tibwa, telle qu'on l'apprend à l'oreille.
    */
   const PRESETS = {
+    'Bèlè — tak pi tak pi tak tak (3 temps)': {
+      bpm: 104, steps: 12,
+      dit: 'tak · pi · tak · pi · tak · tak',
+      tanbouGrave: 'x.....x.....',
+      tanbouAigu:  '...p.....x.p',
+      tambourBass: 'x...........',
+      debonda:     '....x.......',
+      tibwa:       'x.p.x.p.x.x.',
+      chacha:      'p.p.p.p.p.p.',
+      baril:       '............',
+      siyak:       '............',
+      cloche:      '............',
+      lanbi:       '............',
+      cuivres:     '............',
+    },
     'Bèlè (2 temps)': {
       bpm: 108, steps: 16,
+      dit: 'tak · pi · tak · pi · tak · tak · (repos)',
       tanbouGrave: 'x.....x...x.....',
-      tanbouAigu:  '..x..x..x...x.x.',
+      tanbouAigu:  '..p..x..p...x.p.',
       tambourBass: 'x.......x.......',
       debonda:     '....x.......x...',
-      tibwa:       'x.x.x.x.x.x.x.x.',
-      chacha:      '..x...x...x...x.',
+      tibwa:       'x.p.x.p.x.x.p.p.',
+      chacha:      'p.p.p.p.p.p.p.p.',
       baril:       '................',
       siyak:       '................',
       cloche:      '................',
@@ -404,12 +508,13 @@
     },
     'Beliyà / Gran bèlè (3 temps)': {
       bpm: 96, steps: 12,
+      dit: 'tak · pi · tak · pi · tak · tak',
       tanbouGrave: 'x...x.......',
-      tanbouAigu:  '......x..x..',
+      tanbouAigu:  '......x..p..',
       tambourBass: 'x...........',
       debonda:     '....x.......',
-      tibwa:       'x.x.x.x.x.x.',
-      chacha:      '..x...x...x.',
+      tibwa:       'x.p.x.p.x.x.',
+      chacha:      '..p...p...p.',
       baril:       '............',
       siyak:       '............',
       cloche:      '............',
@@ -460,12 +565,13 @@
     },
     'Mazouk créole (3 temps)': {
       bpm: 152, steps: 12,
+      dit: 'tak · pi · tak · pi · tak · tak',
       tanbouGrave: '....x.......',
       tanbouAigu:  '............',
       tambourBass: 'x...........',
       debonda:     'x...x.......',
-      tibwa:       'x.x.x.x.x.x.',
-      chacha:      '..x...x...x.',
+      tibwa:       'x.p.x.p.x.x.',
+      chacha:      '..p...p...p.',
       baril:       '............',
       siyak:       '............',
       cloche:      '............',
@@ -535,8 +641,13 @@
   /** Nombre de pas courants : 16 en deux temps, 12 en trois temps. */
   let steps = 12;
 
-  /** @type {Record<string, boolean[]>} cases actives, par piste */
+  /** Force d'une case : 0 silence, 1 coup léger (pi), 2 coup fort (tak). */
+  const OFF = 0, LIGHT = 1, STRONG = 2;
+
+  /** @type {Record<string, number[]>} force de chaque case, par piste */
   const pattern = {};
+
+  const STORAGE_KEY = 'musik-martinique.v1';
 
   const ui = {
     play: document.getElementById('play'),
@@ -552,6 +663,12 @@
     swingOut: document.getElementById('swingOut'),
     vol: document.getElementById('vol'),
     volOut: document.getElementById('volOut'),
+    dit: document.getElementById('dit'),
+    saveForm: document.getElementById('saveForm'),
+    saveName: document.getElementById('saveName'),
+    saveBtn: document.getElementById('saveBtn'),
+    saveMsg: document.getElementById('saveMsg'),
+    shared: document.getElementById('shared'),
   };
 
   /** @type {HTMLElement[][]} cellules indexées [pas][piste] ; reconstruit à chaque changement de mesure */
@@ -1036,9 +1153,9 @@
    * Joue immédiatement une piste, hors séquenceur, pour la pré-écoute au clic.
    * @param {string} trackId piste à déclencher
    */
-  function preview(trackId) {
+  function preview(trackId, velocity = 1) {
     unlockAudio();
-    trigger(trackId, ctx.currentTime + 0.02, 1);
+    trigger(trackId, ctx.currentTime + 0.02, velocity);
   }
 
   function secondsPerStep() {
@@ -1046,9 +1163,12 @@
   }
 
   function scheduleStep(index, time) {
-    const accent = index % 4 === 0 ? 1 : 0.72;
+    // L'appui de temps garde un léger relief ; la force de la case fait le reste.
+    const beat = index % 4 === 0 ? 1 : 0.88;
     for (const track of TRACKS) {
-      if (pattern[track.id][index]) trigger(track.id, time, accent);
+      const force = pattern[track.id][index];
+      if (force === STRONG) trigger(track.id, time, beat);
+      else if (force === LIGHT) trigger(track.id, time, beat * 0.5);
     }
     visualQueue.push({ step: index, time });
   }
@@ -1152,7 +1272,10 @@
       const name = document.createElement('div');
       name.className = 'name';
       const dot = document.createElement('i');
-      name.append(dot, document.createTextNode(track.label));
+      const key = document.createElement('kbd');
+      key.textContent = KEYS[trackIndex] || '';
+      key.title = 'Touche ' + key.textContent + ' : jouer ' + track.label;
+      name.append(dot, document.createTextNode(track.label), key);
 
       const mute = document.createElement('button');
       mute.className = 'mute';
@@ -1191,10 +1314,12 @@
         cell.dataset.step = String(i);
         cell.setAttribute('aria-label', track.label + ', pas ' + (i + 1));
         cell.addEventListener('click', () => {
-          const on = !pattern[track.id][i];
-          pattern[track.id][i] = on;
+          // silence → tak (fort) → pi (léger) → silence
+          const next = (pattern[track.id][i] + 2) % 3;
+          pattern[track.id][i] = next;
           syncCell(trackIndex, i);
-          if (on && !playing) preview(track.id);
+          persist();
+          if (next !== OFF && !playing) preview(track.id, next === STRONG ? 1 : 0.5);
         });
 
         cells[i].push(cell);
@@ -1212,9 +1337,10 @@
   function syncCell(trackIndex, stepIndex) {
     const track = TRACKS[trackIndex];
     const cell = cellByTrackStep[trackIndex * steps + stepIndex];
-    const on = pattern[track.id][stepIndex];
-    cell.classList.toggle('on', on);
-    cell.classList.toggle('ghost', on && stepIndex % 4 !== 0);
+    const force = pattern[track.id][stepIndex];
+    cell.classList.toggle('on', force !== OFF);
+    cell.classList.toggle('light', force === LIGHT);
+    cell.title = force === STRONG ? 'tak — coup fort' : force === LIGHT ? 'pi — coup léger' : '';
   }
 
   function refreshCells() {
@@ -1244,23 +1370,65 @@
 
     if (preset.steps !== steps) {
       steps = preset.steps;
-      for (const track of TRACKS) pattern[track.id] = new Array(steps).fill(false);
+      for (const track of TRACKS) pattern[track.id] = new Array(steps).fill(OFF);
       buildGrid();
     } else {
-      for (const track of TRACKS) pattern[track.id].fill(false);
+      for (const track of TRACKS) pattern[track.id].fill(OFF);
     }
 
     for (const track of TRACKS) {
       const line = preset[track.id] || '';
-      for (let i = 0; i < steps; i += 1) pattern[track.id][i] = line[i] === 'x';
+      for (let i = 0; i < steps; i += 1) {
+        pattern[track.id][i] = line[i] === 'x' ? STRONG : line[i] === 'p' ? LIGHT : OFF;
+      }
     }
 
     ui.tempo.value = String(preset.bpm);
     ui.tempoOut.textContent = preset.bpm + ' BPM';
     ui.meter.textContent = preset.steps === 12 ? '3 temps · 12 pas' : '2 temps · 16 pas';
+    ui.dit.textContent = preset.dit ? 'Le tibwa dit : ' + preset.dit : '';
 
     refreshCells();
+    persist();
     if (wasPlaying) start();
+  }
+
+  /** Sauvegarde le motif courant dans le navigateur ; sans stockage, la page fonctionne quand même. */
+  function persist() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        preset: ui.preset.value,
+        steps,
+        bpm: Number(ui.tempo.value),
+        swing: Number(ui.swing.value),
+        pattern,
+      }));
+    } catch (e) { /* stockage indisponible : on joue sans mémoire */ }
+  }
+
+  /**
+   * Relit un motif sauvegardé. Le motif remplace les cases du préréglage, pas sa mesure :
+   * un enregistrement fait avec un autre nombre de pas est ignoré.
+   * @returns {boolean} vrai si un motif a été restauré
+   */
+  function restore() {
+    let saved = null;
+    try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)); } catch (e) { return false; }
+    if (!saved || !PRESETS[saved.preset] || !saved.pattern) return false;
+
+    ui.preset.value = saved.preset;
+    applyPreset(saved.preset);
+    if (saved.steps !== steps) return true;
+
+    for (const track of TRACKS) {
+      const line = saved.pattern[track.id];
+      if (!Array.isArray(line) || line.length !== steps) continue;
+      for (let i = 0; i < steps; i += 1) pattern[track.id][i] = [OFF, LIGHT, STRONG].includes(line[i]) ? line[i] : OFF;
+    }
+    if (Number.isFinite(saved.bpm)) { ui.tempo.value = String(saved.bpm); ui.tempoOut.textContent = saved.bpm + ' BPM'; }
+    if (Number.isFinite(saved.swing)) { ui.swing.value = String(saved.swing); }
+    refreshCells();
+    return true;
   }
 
   function bindControls() {
@@ -1287,9 +1455,11 @@
 
     ui.tempo.addEventListener('input', () => {
       ui.tempoOut.textContent = ui.tempo.value + ' BPM';
+      persist();
     });
     ui.swing.addEventListener('input', () => {
       ui.swingOut.textContent = ui.swing.value + ' %';
+      persist();
     });
     ui.vol.addEventListener('input', () => {
       ui.volOut.textContent = Math.round(Number(ui.vol.value) * 100) + ' %';
@@ -1303,25 +1473,151 @@
       if (event.code === 'Space') {
         event.preventDefault();
         toggle();
+        return;
+      }
+
+      // Une touche par instrument, dans l'ordre des pistes : on joue la boîte au clavier.
+      const trackIndex = KEYS.indexOf(event.key);
+      if (trackIndex >= 0 && trackIndex < TRACKS.length && !event.repeat) {
+        preview(TRACKS[trackIndex].id, event.shiftKey ? 0.5 : 1);
+        flashTrack(trackIndex);
       }
     });
   }
 
+  /** Touches de jeu, dans l'ordre des pistes. */
+  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-'];
+
+  // ---------------------------------------------------------------- carnet partagé
+
+  const API = '/api/patterns';
+
+  function setSaveMsg(text, isError) {
+    ui.saveMsg.textContent = text;
+    ui.saveMsg.classList.toggle('err', Boolean(isError));
+  }
+
+  function renderShared(items) {
+    ui.shared.replaceChildren();
+    if (!items.length) {
+      const li = document.createElement('li');
+      li.className = 'empty';
+      li.textContent = 'Aucun motif partagé pour l’instant : le vôtre sera le premier.';
+      ui.shared.append(li);
+      return;
+    }
+    for (const item of items) {
+      const li = document.createElement('li');
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      const title = document.createElement('b');
+      title.textContent = item.name;
+      const meta = document.createElement('small');
+      const when = new Date(item.created);
+      meta.textContent = (item.steps === 12 ? '3 temps' : '2 temps') + ' · ' + item.bpm + ' BPM · '
+        + (Number.isNaN(when.getTime()) ? '' : when.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }));
+      btn.append(title, meta);
+      btn.title = 'Charger « ' + item.name + ' »';
+      btn.addEventListener('click', () => applyShared(item));
+      li.append(btn);
+      ui.shared.append(li);
+    }
+  }
+
+  function loadShared() {
+    fetch(API, { cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((items) => renderShared(Array.isArray(items) ? items : []))
+      .catch(() => {
+        ui.shared.replaceChildren();
+        const li = document.createElement('li');
+        li.className = 'empty';
+        li.textContent = 'Carnet partagé indisponible pour le moment.';
+        ui.shared.append(li);
+      });
+  }
+
+  /**
+   * Charge un motif du carnet : mesure, tempo, swing, cases.
+   * @param {{steps:number,bpm:number,swing:number,pattern:Record<string,number[]>,name:string}} item
+   */
+  function applyShared(item) {
+    const wasPlaying = playing;
+    if (wasPlaying) stop();
+
+    if (item.steps !== steps) {
+      steps = item.steps;
+      for (const track of TRACKS) pattern[track.id] = new Array(steps).fill(OFF);
+      buildGrid();
+    }
+    for (const track of TRACKS) {
+      const line = item.pattern[track.id];
+      for (let i = 0; i < steps; i += 1) {
+        const v = Array.isArray(line) ? line[i] : OFF;
+        pattern[track.id][i] = v === STRONG || v === LIGHT ? v : OFF;
+      }
+    }
+    ui.tempo.value = String(item.bpm);
+    ui.tempoOut.textContent = item.bpm + ' BPM';
+    ui.swing.value = String(item.swing || 0);
+    ui.swingOut.textContent = (item.swing || 0) + ' %';
+    ui.meter.textContent = steps === 12 ? '3 temps · 12 pas' : '2 temps · 16 pas';
+    ui.dit.textContent = 'Motif partagé : ' + item.name;
+    ui.saveName.value = item.name;
+
+    refreshCells();
+    persist();
+    if (wasPlaying) start();
+  }
+
+  function saveShared(event) {
+    event.preventDefault();
+    const name = ui.saveName.value.trim();
+    if (!name) return;
+    ui.saveBtn.disabled = true;
+    setSaveMsg('Envoi…');
+    fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, steps, bpm: Number(ui.tempo.value), swing: Number(ui.swing.value), pattern }),
+    })
+      .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+      .then(({ ok, body }) => {
+        if (!ok) throw new Error(body && body.error ? body.error : 'refusé');
+        setSaveMsg('Enregistré : « ' + body.name + ' » est visible par tous.');
+        loadShared();
+      })
+      .catch((err) => setSaveMsg('Pas enregistré — ' + err.message, true))
+      .finally(() => { ui.saveBtn.disabled = false; });
+  }
+
+  function flashTrack(trackIndex) {
+    const row = ui.grid.querySelectorAll('.track')[trackIndex];
+    if (!row) return;
+    row.classList.add('hit');
+    setTimeout(() => row.classList.remove('hit'), 110);
+  }
+
   function init() {
     for (const track of TRACKS) {
-      pattern[track.id] = new Array(steps).fill(false);
+      pattern[track.id] = new Array(steps).fill(OFF);
       track.muted = false;
     }
 
     buildGrid();
     bindControls();
 
-    ui.preset.value = 'Beliyà / Gran bèlè (3 temps)';
-    applyPreset(ui.preset.value);
+    if (!restore()) {
+      ui.preset.value = 'Bèlè — tak pi tak pi tak tak (3 temps)';
+      applyPreset(ui.preset.value);
+    }
 
     ui.volOut.textContent = Math.round(Number(ui.vol.value) * 100) + ' %';
     ui.swingOut.textContent = ui.swing.value + ' %';
     updateAudioState();
+
+    ui.saveForm.addEventListener('submit', saveShared);
+    loadShared();
   }
 
   init();
