@@ -1019,9 +1019,17 @@
 
   // ---------------------------------------------------------------- séquenceur
 
+  /**
+   * Déclenche une piste.
+   * La date est bornée à l'instant présent : un contexte réveillé tardivement laisserait
+   * la frappe dans le passé, donc inaudible.
+   * @param {string} trackId piste à jouer
+   * @param {number} t date souhaitée, en secondes
+   * @param {number} velocity intensité du coup
+   */
   function trigger(trackId, t, velocity) {
     ensureAudio();
-    VOICES[trackId](t, trackGain[trackId], velocity);
+    VOICES[trackId](Math.max(t, ctx.currentTime), trackGain[trackId], velocity);
   }
 
   /**
