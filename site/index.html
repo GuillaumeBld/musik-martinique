@@ -156,21 +156,25 @@
 
   .audioState.ok { color: #7fc8b0; }
 
-  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 9px; overflow: hidden; }
-  .segBtn {
+  .groupLabel button {
     font: inherit;
-    font-size: 12px;
-    letter-spacing: .06em;
+    font-size: 10.5px;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    color: var(--dim);
-    background: var(--panel-2);
+    color: inherit;
+    background: none;
     border: none;
-    padding: 8px 12px;
+    padding: 0;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
-  .segBtn + .segBtn { border-left: 1px solid var(--line); }
-  .segBtn[aria-pressed="true"] { color: #1a1108; background: var(--accent); }
-  .segBtn:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .groupLabel button::before { content: "▾"; font-size: 11px; transition: transform .15s ease; }
+  .groupLabel.closed button::before { transform: rotate(-90deg); }
+  .groupLabel button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .groupLabel small { margin-left: 8px; letter-spacing: 0; text-transform: none; color: #6b5c51; }
+  .track.hidden { display: none; }
 
   select, .ghost {
     font: inherit;
@@ -411,17 +415,13 @@
 <div class="wrap">
   <header>
     <h1>Boîte à <span>rythme</span> — Matinik</h1>
-    <p>Percussions martiniquaises synthétisées en direct : bèlè, chouval bwa, biguine, mazouk, les groupes à pied du carnaval, et le bouyon.<br>
-       Quatorze timbres : de vrais enregistrements pour les peaux, le bois et le métal, la Web Audio API pour le reste.</p>
+    <p>Les instruments de la musique martiniquaise, du tanbou bèlè à la clarinette de biguine, du groupe à pied du carnaval au bouyon.<br>
+       Trente-six pistes, toutes sur de vrais enregistrements, classées par famille. Cliquez le nom d'une famille pour la replier.</p>
   </header>
 
   <div class="transport">
     <button class="play" id="play">▶ Lecture</button>
     <span class="audioState" id="audioState">audio : en attente</span>
-    <span class="seg" role="group" aria-label="Source des sons">
-      <button type="button" class="segBtn" id="modeSamples" aria-pressed="true">Échantillons</button>
-      <button type="button" class="segBtn" id="modeSynth" aria-pressed="false">Synthèse</button>
-    </span>
 
     <label class="field">Tempo <input type="range" id="tempo" min="50" max="200" step="1" value="96"><output id="tempoOut">96 BPM</output></label>
     <label class="field">Swing <input type="range" id="swing" min="0" max="60" step="1" value="0"><output id="swingOut">0 %</output></label>
@@ -463,7 +463,7 @@
       <br>
       <strong>Le carnaval.</strong> Dans un <em>groupe à pied</em> — l'orchestre de rue des vidés — la base est le tambour, souvent un <em>baril</em> de récupération, plus clair et plus mordant que le tanbou bèlè. S'y ajoutent le <em>ti-bwa</em>, le <em>cha-cha</em>, la <em>cloche</em>, le <em>siyak</em> (une grande râpe de bois ou de métal que l'on gratte d'une baguette), la <em>conque de lambi</em> qui servait autrefois de signal, et selon les groupes des <em>cuivres</em> — trompette et trombone.
       <br>
-      <strong>Deux sources de son.</strong> En mode <em>Échantillons</em>, douze pistes jouent de vrais enregistrements : congas et bongos pour les tanbou et le débonda (« Bongos and Conga Hits » de MrRentAPercussionist sur Freesound, CC BY 4.0), djembé, bloc de bois, cabasa, güiro et cowbell des <em>Philharmonia Orchestra sound samples</em>, 808, caisse claire, toms et cymbale de la banque de Sonic Pi (CC0). Une tumbadora ralentie tient le tambour di bass, le güiro tient le siyak. Lanbi et cuivres restent synthétisés. En mode <em>Synthèse</em>, tout est fabriqué par la Web Audio API : chaque timbre cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
+      <strong>Les sons.</strong> Toutes les pistes jouent de vrais enregistrements, jamais de synthèse. Congas et bongos : « Bongos and Conga Hits » de MrRentAPercussionist sur Freesound (CC BY 4.0). Conque : RoofDog sur Freesound (CC0). Djembé, surdo, toms, bloc de bois, cabasa, güiro, cowbell, trombone, trompette, clarinette, flûte, saxophone, banjo, guitare et contrebasse : <em>Philharmonia Orchestra sound samples</em>. 808, caisse claire, tom, charleys et bloc électro : banque de Sonic Pi (CC0). Quand l'instrument martiniquais lui-même n'existe pas en enregistrement libre (tanbou bèlè, tibwa, chacha, siyak, ka), la ligne « enregistré : … » dit ce qui le remplace : une tumbadora ralentie pour le tambour di bass, un güiro pour le siyak, un djembé pour le ka. Les instruments mélodiques jouent une note fixe, indiquée à côté du nom. En mode <em>Synthèse</em>, tout est fabriqué par la Web Audio API : chaque timbre cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
     </div>
   </footer>
 </div>
@@ -476,21 +476,55 @@
    * Palette de percussions martiniquaises, groupée par formation.
    * `role` rappelle la fonction de l'instrument dans la formation d'origine.
    */
+  /**
+   * Instruments de la musique martiniquaise, classés par type. `role` dit ce qui est
+   * réellement enregistré (l'instrument lui-même, ou le plus proche disponible en licence libre).
+   */
   const TRACKS = [
-    { id: 'tanbouGrave', label: 'Tanbou bèlè',      role: 'peau, main — grave',    color: '#e2725b', level: 1.00, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'tanbouAigu',  label: 'Tanbou répondeur', role: 'bord, doigts — aigu',   color: '#f2a65a', level: 0.80, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'tambourBass', label: 'Tambour di bass',  role: 'le plus grave',         color: '#a63d2f', level: 0.90, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'debonda',     label: 'Tanbou débonda',   role: 'deux faces, chouval bwa', color: '#c98a4b', level: 0.85, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'tibwa',       label: 'Tibwa',            role: 'baguettes sur le fût',  color: '#d9c46a', level: 0.70, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'chacha',      label: 'Chacha',           role: 'calebasse à graines',   color: '#7fc8b0', level: 0.55, group: 'Bèlè, chouval bwa, bal' },
-    { id: 'baril',       label: 'Tanbou baril',     role: 'fût de groupe à pied',  color: '#8fb8c9', level: 0.85, group: 'Carnaval — groupes à pied' },
-    { id: 'siyak',       label: 'Siyak',            role: 'grande râpe grattée',   color: '#b6a4de', level: 0.60, group: 'Carnaval — groupes à pied' },
-    { id: 'cloche',      label: 'Cloche',           role: 'métal de parade',       color: '#c9a227', level: 0.50, group: 'Carnaval — groupes à pied' },
-    { id: 'lanbi',       label: 'Konn lanbi',       role: 'conque — appel',        color: '#e8a9a0', level: 0.45, group: 'Carnaval — groupes à pied' },
-    { id: 'cuivres',     label: 'Cuivres',          role: 'trombone de défilé',    color: '#ffcf5c', level: 0.40, group: 'Carnaval — groupes à pied' },
-    { id: 'kickBouyon',  label: 'Kick bouyon',      role: 'grosse caisse électro', color: '#ff6b57', level: 0.95, group: 'Bouyon — électro' },
-    { id: 'snareBouyon', label: 'Snare bouyon',     role: 'caisse claire électro', color: '#f7d774', level: 0.70, group: 'Bouyon — électro' },
-    { id: 'contretemps', label: 'Contretemps',      role: 'charley ouvert sur le « et »', color: '#9fe3ff', level: 0.55, group: 'Bouyon — électro' },
+    // Peaux — tambours traditionnels
+    { id: 'tanbouGrave', label: 'Tanbou bèlè',       role: 'enregistré : conga, tumbadora, djembé', color: '#e2725b', level: 1.00, group: 'Peaux — tambours traditionnels' },
+    { id: 'tanbouAigu',  label: 'Tanbou répondeur',  role: 'enregistré : quinto et bongo, slap',   color: '#f2a65a', level: 0.80, group: 'Peaux — tambours traditionnels' },
+    { id: 'tambourBass', label: 'Tambour di bass',   role: 'enregistré : tumbadora ralentie, surdo', color: '#a63d2f', level: 0.95, group: 'Peaux — tambours traditionnels' },
+    { id: 'debonda',     label: 'Tanbou débonda',    role: 'chouval bwa · enregistré : bongos',    color: '#c98a4b', level: 0.85, group: 'Peaux — tambours traditionnels' },
+    { id: 'baril',       label: 'Tanbou baril',      role: 'groupe à pied · enregistré : tom, bongo', color: '#8fb8c9', level: 0.85, group: 'Peaux — tambours traditionnels' },
+    { id: 'ka',          label: 'Ka (gwoka)',        role: 'enregistré : djembé',                   color: '#d98b5b', level: 0.90, group: 'Peaux — tambours traditionnels' },
+    // Peaux — orchestre
+    { id: 'conga',       label: 'Conga',             role: 'biguine, zouk · main ouverte',          color: '#e39a6b', level: 0.90, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    { id: 'tumba',       label: 'Tumbadora',         role: 'la conga grave',                        color: '#c47a52', level: 0.95, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    { id: 'quinto',      label: 'Quinto',            role: 'la conga aiguë, ouvert et slap',         color: '#f0b07a', level: 0.85, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    { id: 'bongo',       label: 'Bongos',            role: 'grave, aigu, slap',                     color: '#f4c48f', level: 0.85, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    { id: 'timbales',    label: 'Timbales',          role: 'enregistré : toms, aigu',               color: '#e8d2a6', level: 0.85, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    { id: 'djembe',      label: 'Djembé',            role: 'groupes actuels',                       color: '#b8734f', level: 0.90, group: 'Peaux — orchestre (biguine, zouk, salsa)' },
+    // Batterie
+    { id: 'kickBouyon',  label: 'Grosse caisse 808', role: 'bouyon, zouk électro',                  color: '#ff6b57', level: 0.95, group: 'Batterie (zouk, bouyon)' },
+    { id: 'grosseCaisse', label: 'Grosse caisse',    role: 'batterie acoustique',                   color: '#d9583f', level: 0.95, group: 'Batterie (zouk, bouyon)' },
+    { id: 'snareBouyon', label: 'Caisse claire',     role: 'claquante',                             color: '#f7d774', level: 0.70, group: 'Batterie (zouk, bouyon)' },
+    { id: 'tom',         label: 'Tom',               role: 'tom aigu, baguettes',                    color: '#e0b26a', level: 0.85, group: 'Batterie (zouk, bouyon)' },
+    { id: 'charleyFerme', label: 'Charley fermé',    role: 'doubles croches du zouk',               color: '#bfe6f5', level: 0.55, group: 'Batterie (zouk, bouyon)' },
+    { id: 'contretemps', label: 'Charley ouvert',    role: 'le contretemps, sur le « et »',         color: '#9fe3ff', level: 0.55, group: 'Batterie (zouk, bouyon)' },
+    // Bois
+    { id: 'tibwa',       label: 'Tibwa',             role: 'baguettes sur le fût · enregistré : bloc de bois', color: '#d9c46a', level: 0.70, group: 'Bois' },
+    { id: 'tibwaBambou', label: 'Ti-bwa bambou',     role: 'chouval bwa · enregistré : bloc aigu',  color: '#e6d98a', level: 0.65, group: 'Bois' },
+    { id: 'claves',      label: 'Claves',            role: 'biguine · enregistré : bloc de bois',   color: '#c9b56a', level: 0.65, group: 'Bois' },
+    // Métal
+    { id: 'cloche',      label: 'Cloche de carnaval', role: 'cowbell étouffée et ouverte',          color: '#c9a227', level: 0.55, group: 'Métal' },
+    { id: 'campana',     label: 'Campana',           role: 'cowbell ouverte, salsa et zouk',        color: '#e0c04a', level: 0.50, group: 'Métal' },
+    // Secoués et grattés
+    { id: 'chacha',      label: 'Chacha',            role: 'calebasse à graines · enregistré : cabasa', color: '#7fc8b0', level: 0.60, group: 'Secoués et grattés' },
+    { id: 'siyak',       label: 'Siyak',             role: 'grande râpe · enregistré : güiro',      color: '#b6a4de', level: 0.60, group: 'Secoués et grattés' },
+    { id: 'guiro',       label: 'Güiro',             role: 'biguine, gratté court',                 color: '#a3b8de', level: 0.55, group: 'Secoués et grattés' },
+    { id: 'shaker',      label: 'Shaker',            role: 'enregistré : cabasa, bref',             color: '#9fd8c4', level: 0.50, group: 'Secoués et grattés' },
+    // Vents et appels
+    { id: 'lanbi',       label: 'Konn lanbi',        role: 'conque, appel du carnaval',             color: '#e8a9a0', level: 0.55, group: 'Vents et appels' },
+    { id: 'flute',       label: 'Flûte des mornes',  role: 'enregistré : flûte, do 5',              color: '#cfe3a8', level: 0.55, group: 'Vents et appels' },
+    { id: 'clarinette',  label: 'Clarinette',        role: 'biguine · do 4',                        color: '#b9d48a', level: 0.55, group: 'Vents et appels' },
+    { id: 'sax',         label: 'Saxophone',         role: 'biguine, zouk · do 4',                  color: '#e8c56a', level: 0.55, group: 'Vents et appels' },
+    { id: 'trompette',   label: 'Trompette',         role: 'do 4',                                  color: '#ffd36b', level: 0.50, group: 'Vents et appels' },
+    { id: 'cuivres',     label: 'Trombone',          role: 'défilé, biguine · do 4',                color: '#ffcf5c', level: 0.50, group: 'Vents et appels' },
+    // Cordes
+    { id: 'banjo',       label: 'Banjo',             role: 'biguine, Kali · do 4 et sol 3',         color: '#d8a7c8', level: 0.60, group: 'Cordes' },
+    { id: 'guitare',     label: 'Guitare',           role: 'mi 3',                                  color: '#c793b8', level: 0.60, group: 'Cordes' },
+    { id: 'basse',       label: 'Contrebasse',       role: 'zouk, biguine · la 2 pincé',            color: '#a97ca0', level: 0.80, group: 'Cordes' },
   ];
 
   /**
@@ -797,8 +831,6 @@
     vol: document.getElementById('vol'),
     volOut: document.getElementById('volOut'),
     dit: document.getElementById('dit'),
-    modeSamples: document.getElementById('modeSamples'),
-    modeSynth: document.getElementById('modeSynth'),
     saveForm: document.getElementById('saveForm'),
     saveName: document.getElementById('saveName'),
     saveBtn: document.getElementById('saveBtn'),
@@ -818,7 +850,6 @@
 
   let ctx = null;
   let master = null;
-  let noiseBuffer = null;
   let silentFrameDone = false;
   const trackGain = {};
 
@@ -831,19 +862,10 @@
   const visualQueue = [];
   let rafId = null;
 
-  function createNoiseBuffer(audio) {
-    const frames = Math.floor(audio.sampleRate * 2);
-    const buffer = audio.createBuffer(1, frames, audio.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < frames; i += 1) data[i] = Math.random() * 2 - 1;
-    return buffer;
-  }
-
   function ensureAudio() {
     if (ctx) return;
 
     ctx = new (window.AudioContext || window.webkitAudioContext)();
-    noiseBuffer = createNoiseBuffer(ctx);
 
     const limiter = ctx.createDynamicsCompressor();
     limiter.threshold.value = -6;
@@ -917,424 +939,6 @@
     ui.audioState.classList.toggle('ok', running);
   }
 
-  /**
-   * Applique une enveloppe percussive à un paramètre de gain.
-   * @param {GainNode} node nœud dont le gain porte l'enveloppe
-   * @param {number} t date de déclenchement, en secondes
-   * @param {number} peak amplitude maximale
-   * @param {number} attack durée d'attaque, en secondes
-   * @param {number} decay durée de décroissance, en secondes
-   */
-  function envelope(node, t, peak, attack, decay) {
-    const g = node.gain;
-    g.cancelScheduledValues(t);
-    g.setValueAtTime(0.0001, t);
-    g.linearRampToValueAtTime(Math.max(peak, 0.0002), t + attack);
-    g.exponentialRampToValueAtTime(0.0001, t + attack + decay);
-  }
-
-  /**
-   * Source de bruit blanc, déjà planifiée.
-   * @param {number} t date de départ, en secondes
-   * @param {number} duration durée avant arrêt, en secondes
-   * @returns {AudioBufferSourceNode} la source à raccorder au filtre suivant
-   */
-  function noiseSource(t, duration) {
-    const src = ctx.createBufferSource();
-    src.buffer = noiseBuffer;
-    src.loop = true;
-    src.start(t);
-    src.stop(t + duration);
-    return src;
-  }
-
-  /**
-   * Dévie légèrement une fréquence pour que deux frappes identiques ne sonnent pas pareil.
-   * @param {number} base fréquence nominale, en hertz
-   * @param {number} spread amplitude relative de la déviation
-   * @returns {number} fréquence déviée
-   */
-  function detune(base, spread) {
-    return base * (1 - spread / 2 + Math.random() * spread);
-  }
-
-  /**
-   * Tanbou bèlè : peau de cabri frappée à la main, sourde et glissée.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function tanbouGrave(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(detune(92, 0.1), t);
-    osc.frequency.exponentialRampToValueAtTime(detune(64, 0.1), t + 0.16);
-    envelope(g, t, v, 0.003, 0.34);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.46);
-
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 900;
-    const slap = ctx.createGain();
-    envelope(slap, t, v * 0.32, 0.001, 0.05);
-    noiseSource(t, 0.09).connect(lp).connect(slap).connect(out);
-  }
-
-  /**
-   * Tanbou répondeur : phalanges frappées sur le bord de la peau.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function tanbouAigu(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(detune(410, 0.12), t);
-    osc.frequency.exponentialRampToValueAtTime(detune(300, 0.12), t + 0.05);
-    envelope(g, t, v * 0.85, 0.001, 0.11);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.19);
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 2600;
-    bp.Q.value = 1.4;
-    const slap = ctx.createGain();
-    envelope(slap, t, v * 0.38, 0.0006, 0.028);
-    noiseSource(t, 0.06).connect(bp).connect(slap).connect(out);
-  }
-
-  /**
-   * Tambour di bass : le plus grave de la formation, long et étouffé.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function tambourBass(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(64, t);
-    osc.frequency.exponentialRampToValueAtTime(46, t + 0.2);
-    envelope(g, t, v * 1.15, 0.004, 0.55);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.72);
-  }
-
-  /**
-   * Tanbou débonda : tambour à deux faces, tendu sans cercle, sec et médium.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function debonda(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(detune(178, 0.1), t);
-    osc.frequency.exponentialRampToValueAtTime(detune(118, 0.1), t + 0.09);
-    envelope(g, t, v * 0.8, 0.002, 0.22);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.33);
-
-    const lp = ctx.createBiquadFilter();
-    lp.type = 'lowpass';
-    lp.frequency.value = 1600;
-    const slap = ctx.createGain();
-    envelope(slap, t, v * 0.28, 0.001, 0.04);
-    noiseSource(t, 0.08).connect(lp).connect(slap).connect(out);
-  }
-
-  /**
-   * Tibwa : baguettes de bois frappées sur le fût, bois sec et très bref.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function tibwa(t, out, v) {
-    for (const [freq, amp, decay] of [[1750, 0.85, 0.035], [2680, 0.45, 0.024]]) {
-      const osc = ctx.createOscillator();
-      const g = ctx.createGain();
-      osc.type = 'triangle';
-      osc.frequency.value = detune(freq, 0.05);
-      envelope(g, t, v * amp * 0.34, 0.0005, decay);
-      osc.connect(g).connect(out);
-      osc.start(t);
-      osc.stop(t + decay + 0.05);
-    }
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 3400;
-    bp.Q.value = 1.2;
-    const click = ctx.createGain();
-    envelope(click, t, v * 0.45, 0.0004, 0.011);
-    noiseSource(t, 0.05).connect(bp).connect(click).connect(out);
-  }
-
-  /**
-   * Chacha : cylindre de fer-blanc rempli de grenaille.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function chacha(t, out, v) {
-    const hp = ctx.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.value = 5200;
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 9000;
-    bp.Q.value = 0.7;
-    const g = ctx.createGain();
-    envelope(g, t, v * 0.55, 0.002, 0.075);
-    noiseSource(t, 0.14).connect(hp).connect(bp).connect(g).connect(out);
-  }
-
-  /**
-   * Cloche : métal de carnaval, partiels inharmoniques.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function cloche(t, out, v) {
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 1500;
-    bp.Q.value = 1.1;
-    const g = ctx.createGain();
-    envelope(g, t, v * 0.4, 0.001, 0.22);
-    bp.connect(g).connect(out);
-    for (const freq of [930, 1420, 2140]) {
-      const osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      osc.connect(bp);
-      osc.start(t);
-      osc.stop(t + 0.3);
-    }
-  }
-
-  /**
-   * Konn lanbi : conque soufflée, appel des groupes à pied du carnaval.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function lanbi(t, out, v) {
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 620;
-    bp.Q.value = 3.2;
-    const g = ctx.createGain();
-    envelope(g, t, v * 0.5, 0.045, 0.32);
-    bp.connect(g).connect(out);
-
-    const osc = ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(232, t);
-    osc.frequency.linearRampToValueAtTime(244, t + 0.08);
-    osc.frequency.linearRampToValueAtTime(228, t + 0.3);
-    osc.connect(bp);
-    osc.start(t);
-    osc.stop(t + 0.46);
-
-    const air = ctx.createBiquadFilter();
-    air.type = 'bandpass';
-    air.frequency.value = 1400;
-    air.Q.value = 0.8;
-    const breath = ctx.createGain();
-    envelope(breath, t, v * 0.16, 0.04, 0.3);
-    noiseSource(t, 0.42).connect(air).connect(breath).connect(out);
-  }
-
-  /**
-   * Tanbou baril : fût de récupération du groupe à pied, baguette sur peau tendue.
-   * Plus clair et plus mordant que le tanbou bèlè, avec la résonance du fût.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function baril(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(detune(196, 0.09), t);
-    osc.frequency.exponentialRampToValueAtTime(detune(132, 0.09), t + 0.07);
-    envelope(g, t, v * 0.9, 0.001, 0.19);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.31);
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 2100;
-    bp.Q.value = 0.9;
-    const crack = ctx.createGain();
-    envelope(crack, t, v * 0.5, 0.0005, 0.022);
-    noiseSource(t, 0.05).connect(bp).connect(crack).connect(out);
-
-    const ring = ctx.createBiquadFilter();
-    ring.type = 'bandpass';
-    ring.frequency.value = 720;
-    ring.Q.value = 5;
-    const resonance = ctx.createGain();
-    envelope(resonance, t, v * 0.28, 0.001, 0.09);
-    noiseSource(t, 0.14).connect(ring).connect(resonance).connect(out);
-  }
-
-  /**
-   * Siyak : grande râpe de bois ou de métal grattée à la baguette.
-   * La dentelure est simulée par une modulation carrée rapide du grain, appliquée
-   * avant l'enveloppe du geste pour que le grattage s'arrête franchement.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function siyak(t, out, v) {
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = detune(1700, 0.22);
-    bp.Q.value = 2.2;
-
-    const grain = ctx.createGain();
-    grain.gain.value = 0.5;
-    const teeth = ctx.createOscillator();
-    teeth.type = 'square';
-    teeth.frequency.value = detune(92, 0.2);
-    const depth = ctx.createGain();
-    depth.gain.value = 0.45;
-    teeth.connect(depth).connect(grain.gain);
-    teeth.start(t);
-    teeth.stop(t + 0.34);
-
-    const duration = 0.28;
-    const gesture = ctx.createGain();
-    gesture.gain.setValueAtTime(0.0001, t);
-    gesture.gain.linearRampToValueAtTime(v * 0.5, t + 0.008);
-    gesture.gain.setValueAtTime(v * 0.5, t + duration * 0.6);
-    gesture.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-
-    noiseSource(t, duration + 0.04).connect(bp).connect(grain).connect(gesture).connect(out);
-  }
-
-  /**
-   * Cuivres : trombone des défilés de carnaval, attaque puis chute de hauteur.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function cuivres(t, out, v) {
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'lowpass';
-    bp.frequency.setValueAtTime(2600, t);
-    bp.frequency.exponentialRampToValueAtTime(700, t + 0.3);
-    bp.Q.value = 3;
-
-    const g = ctx.createGain();
-    envelope(g, t, v * 0.34, 0.035, 0.3);
-    bp.connect(g).connect(out);
-
-    const osc = ctx.createOscillator();
-    osc.type = 'sawtooth';
-    osc.frequency.setValueAtTime(233, t);
-    osc.frequency.linearRampToValueAtTime(220, t + 0.22);
-    osc.frequency.exponentialRampToValueAtTime(165, t + 0.36);
-    osc.connect(bp);
-    osc.start(t);
-    osc.stop(t + 0.46);
-
-    const breath = ctx.createGain();
-    envelope(breath, t, v * 0.12, 0.012, 0.05);
-    noiseSource(t, 0.1).connect(breath).connect(out);
-  }
-
-  /**
-   * Kick bouyon : grosse caisse électronique, chute de hauteur rapide et longue queue grave.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function kickBouyon(t, out, v) {
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(150, t);
-    osc.frequency.exponentialRampToValueAtTime(44, t + 0.09);
-    envelope(g, t, v * 1.2, 0.002, 0.42);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.55);
-
-    const click = ctx.createGain();
-    envelope(click, t, v * 0.35, 0.0005, 0.012);
-    noiseSource(t, 0.03).connect(click).connect(out);
-  }
-
-  /**
-   * Snare bouyon : caisse claire électronique, claquante et brève.
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function snareBouyon(t, out, v) {
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 2200;
-    bp.Q.value = 0.9;
-    const snap = ctx.createGain();
-    envelope(snap, t, v * 0.8, 0.001, 0.13);
-    noiseSource(t, 0.2).connect(bp).connect(snap).connect(out);
-
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(238, t);
-    osc.frequency.exponentialRampToValueAtTime(170, t + 0.06);
-    envelope(g, t, v * 0.55, 0.001, 0.08);
-    osc.connect(g).connect(out);
-    osc.start(t);
-    osc.stop(t + 0.16);
-  }
-
-  /**
-   * Contretemps : charley ouvert électronique, souffle métallique qui s'ouvre sur le « et ».
-   * @param {number} t date du coup
-   * @param {AudioNode} out sortie de la piste
-   * @param {number} v intensité
-   */
-  function contretemps(t, out, v) {
-    const hp = ctx.createBiquadFilter();
-    hp.type = 'highpass';
-    hp.frequency.value = 6500;
-    const g = ctx.createGain();
-    envelope(g, t, v * 0.5, 0.002, 0.24);
-    noiseSource(t, 0.3).connect(hp).connect(g).connect(out);
-
-    const bp = ctx.createBiquadFilter();
-    bp.type = 'bandpass';
-    bp.frequency.value = 8200;
-    bp.Q.value = 1.5;
-    const metal = ctx.createGain();
-    envelope(metal, t, v * 0.16, 0.002, 0.2);
-    bp.connect(metal).connect(out);
-    for (const freq of [3130, 4370, 5810]) {
-      const osc = ctx.createOscillator();
-      osc.type = 'square';
-      osc.frequency.value = freq;
-      osc.connect(bp);
-      osc.start(t);
-      osc.stop(t + 0.26);
-    }
-  }
-
   // ---------------------------------------------------------------- échantillons
 
   /**
@@ -1342,31 +946,53 @@
    * tirées au hasard à chaque coup, avec un taux de lecture qui rapproche l'instrument
    * enregistré de l'instrument visé (une tabla ralentie sonne comme un fût plus grand).
    * `cut` limite la durée des sons longs (cymbale) pour garder un coup net.
-   * Les pistes absentes ici restent en synthèse : bruit et souffle y sont plus vrais.
+   * Chaque piste de TRACKS doit avoir une entrée ici : sans échantillon, elle est muette.
    */
   const SAMPLES = {
-    // fs_* : « Bongos and Conga Hits », MrRentAPercussionist, Freesound, CC BY 4.0
+    // fs_* : Freesound — « Bongos and Conga Hits » (MrRentAPercussionist, CC BY 4.0), conque (RoofDog, CC0)
     // ph_* : Philharmonia Orchestra sound samples · autres : banque Sonic Pi, CC0
     tanbouGrave: { files: ['fs_conga_open', 'fs_tumba_open', 'ph_djembe'], rate: 0.86, gain: 1.2 },
     tanbouAigu:  { files: ['fs_quinto_slap', 'fs_quinto_open', 'fs_bongo_hi_slap'], rate: 1.0, gain: 0.95 },
-    tambourBass: { files: ['fs_tumba_open', 'drum_bass_hard'], rate: 0.66, gain: 1.4 },
+    tambourBass: { files: ['fs_tumba_open', 'ph_surdo'], rate: 0.66, gain: 1.4 },
     debonda:     { files: ['fs_bongo_low', 'fs_bongo_hi'], rate: 0.95, gain: 1.0 },
-    tibwa:       { files: ['ph_woodblock', 'elec_wood'], rate: 1.25, gain: 0.8, cut: 0.18 },
-    chacha:      { files: ['ph_cabasa'], rate: 1.1, gain: 0.7, cut: 0.22 },
     baril:       { files: ['drum_tom_hi_hard', 'fs_bongo_low'], rate: 1.2, gain: 1.0 },
-    siyak:       { files: ['ph_guiro_scraped', 'ph_guiro_struck'], rate: 1.0, gain: 0.8, cut: 0.4 },
-    cloche:      { files: ['ph_cowbell_damped', 'ph_cowbell_open', 'drum_cowbell'], rate: 1.0, gain: 0.75 },
+    ka:          { files: ['ph_djembe'], rate: 0.95, gain: 1.1 },
+    conga:       { files: ['fs_conga_open'], rate: 1.0, gain: 1.0 },
+    tumba:       { files: ['fs_tumba_open'], rate: 1.0, gain: 1.1 },
+    quinto:      { files: ['fs_quinto_open', 'fs_quinto_slap'], rate: 1.0, gain: 0.95 },
+    bongo:       { files: ['fs_bongo_low', 'fs_bongo_hi', 'fs_bongo_hi_slap'], rate: 1.0, gain: 0.95 },
+    timbales:    { files: ['ph_tomtoms'], rate: 1.3, gain: 1.0 },
+    djembe:      { files: ['ph_djembe'], rate: 1.0, gain: 1.0 },
     kickBouyon:  { files: ['bd_808'], rate: 1.0, gain: 1.3 },
+    grosseCaisse: { files: ['drum_bass_hard'], rate: 1.0, gain: 1.2 },
     snareBouyon: { files: ['sn_dolf'], rate: 1.0, gain: 0.9 },
+    tom:         { files: ['drum_tom_hi_hard'], rate: 1.0, gain: 1.0 },
+    charleyFerme: { files: ['drum_cymbal_closed'], rate: 1.0, gain: 0.7 },
     contretemps: { files: ['drum_cymbal_open'], rate: 1.2, gain: 0.6, cut: 0.32 },
+    tibwa:       { files: ['ph_woodblock', 'elec_wood'], rate: 1.25, gain: 0.8, cut: 0.18 },
+    tibwaBambou: { files: ['elec_wood'], rate: 1.7, gain: 0.7, cut: 0.15 },
+    claves:      { files: ['ph_woodblock'], rate: 1.5, gain: 0.8, cut: 0.15 },
+    cloche:      { files: ['ph_cowbell_damped', 'ph_cowbell_open', 'drum_cowbell'], rate: 1.0, gain: 0.75 },
+    campana:     { files: ['ph_cowbell_open'], rate: 0.9, gain: 0.7 },
+    chacha:      { files: ['ph_cabasa'], rate: 1.1, gain: 0.7, cut: 0.22 },
+    siyak:       { files: ['ph_guiro_scraped', 'ph_guiro_struck'], rate: 1.0, gain: 0.8, cut: 0.4 },
+    guiro:       { files: ['ph_guiro_scraped'], rate: 1.3, gain: 0.7, cut: 0.25 },
+    shaker:      { files: ['ph_cabasa'], rate: 1.4, gain: 0.6, cut: 0.14 },
+    lanbi:       { files: ['fs_conch'], rate: 1.0, gain: 0.9 },
+    flute:       { files: ['ph_flute_c5'], rate: 1.0, gain: 0.9 },
+    clarinette:  { files: ['ph_clarinet_c4'], rate: 1.0, gain: 0.9 },
+    sax:         { files: ['ph_sax_c4'], rate: 1.0, gain: 0.9 },
+    trompette:   { files: ['ph_trumpet_c4'], rate: 1.0, gain: 0.8 },
+    cuivres:     { files: ['ph_trombone_c4', 'ph_trombone_a3'], rate: 1.0, gain: 0.8 },
+    banjo:       { files: ['ph_banjo_c4', 'ph_banjo_g3'], rate: 1.0, gain: 0.9, cut: 0.7 },
+    guitare:     { files: ['ph_guitar_e3'], rate: 1.0, gain: 0.9, cut: 0.7 },
+    basse:       { files: ['ph_dbass'], rate: 1.0, gain: 1.2, cut: 0.6 },
   };
 
   /** @type {Record<string, ArrayBuffer>} fichiers téléchargés, en attente du contexte audio */
   const sampleBytes = {};
   /** @type {Record<string, AudioBuffer>} échantillons décodés, prêts à jouer */
   const sampleBuffers = {};
-  let sampleMode = 'samples';
-  const MODE_KEY = 'musik-martinique.mode';
 
   /** Télécharge les fichiers dès l'ouverture ; le décodage attend le premier geste. */
   function fetchSamples() {
@@ -1376,7 +1002,7 @@
       fetch('samples/' + name + '.mp3', { cache: 'force-cache' })
         .then((r) => (r.ok ? r.arrayBuffer() : Promise.reject(new Error(String(r.status)))))
         .then((bytes) => { sampleBytes[name] = bytes; if (ctx) decodeSample(name); })
-        .catch(() => { /* fichier manquant : la piste restera en synthèse */ });
+        .catch(() => { /* fichier manquant : la piste restera muette */ });
     }
   }
 
@@ -1393,7 +1019,7 @@
 
   /**
    * Joue un enregistrement de la piste, s'il est prêt.
-   * @returns {boolean} faux si aucun échantillon n'est disponible (la synthèse prend le relais)
+   * @returns {boolean} faux si l'échantillon n'est pas encore décodé (le coup est perdu)
    */
   function playSample(trackId, t, out, v) {
     const spec = SAMPLES[trackId];
@@ -1420,30 +1046,6 @@
     return true;
   }
 
-  function setMode(mode) {
-    sampleMode = mode;
-    ui.modeSamples.setAttribute('aria-pressed', String(mode === 'samples'));
-    ui.modeSynth.setAttribute('aria-pressed', String(mode === 'synth'));
-    try { localStorage.setItem(MODE_KEY, mode); } catch (e) { /* sans mémoire */ }
-  }
-
-  const VOICES = {
-    kickBouyon,
-    snareBouyon,
-    contretemps,
-    tanbouGrave,
-    tanbouAigu,
-    tambourBass,
-    debonda,
-    tibwa,
-    chacha,
-    baril,
-    siyak,
-    cloche,
-    lanbi,
-    cuivres,
-  };
-
   // ---------------------------------------------------------------- séquenceur
 
   /**
@@ -1456,9 +1058,7 @@
    */
   function trigger(trackId, t, velocity) {
     ensureAudio();
-    const when = Math.max(t, ctx.currentTime);
-    if (sampleMode === 'samples' && playSample(trackId, when, trackGain[trackId], velocity)) return;
-    VOICES[trackId](when, trackGain[trackId], velocity);
+    playSample(trackId, Math.max(t, ctx.currentTime), trackGain[trackId], velocity);
   }
 
   /**
@@ -1573,12 +1173,23 @@
         currentGroup = track.group;
         const label = document.createElement('div');
         label.className = 'groupLabel';
-        label.textContent = track.group;
+        label.dataset.group = track.group;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = track.group;
+        const count = document.createElement('small');
+        count.textContent = TRACKS.filter((t) => t.group === track.group).length + ' pistes';
+        btn.append(count);
+        btn.addEventListener('click', () => toggleGroup(track.group));
+        label.append(btn);
+        if (closedGroups.has(track.group)) label.classList.add('closed');
         frag.append(label);
       }
 
       const row = document.createElement('div');
       row.className = 'track' + (trackIndex % 2 === 1 ? ' alt' : '');
+      row.dataset.group = track.group;
+      if (closedGroups.has(track.group)) row.classList.add('hidden');
       row.style.setProperty('--c', track.color);
 
       const name = document.createElement('div');
@@ -1644,6 +1255,22 @@
     });
 
     ui.grid.append(frag);
+  }
+
+  /** Familles repliées, mémorisées dans le navigateur. */
+  const closedGroups = new Set();
+  const GROUPS_KEY = 'musik-martinique.groups';
+  try { for (const g of JSON.parse(localStorage.getItem(GROUPS_KEY) || '[]')) closedGroups.add(g); } catch (e) { /* sans mémoire */ }
+
+  function toggleGroup(group) {
+    if (closedGroups.has(group)) closedGroups.delete(group); else closedGroups.add(group);
+    const closed = closedGroups.has(group);
+    for (const el of ui.grid.querySelectorAll('[data-group]')) {
+      if (el.dataset.group !== group) continue;
+      if (el.classList.contains('groupLabel')) el.classList.toggle('closed', closed);
+      else el.classList.toggle('hidden', closed);
+    }
+    try { localStorage.setItem(GROUPS_KEY, JSON.stringify([...closedGroups])); } catch (e) { /* sans mémoire */ }
   }
 
   function syncCell(trackIndex, stepIndex) {
@@ -1803,7 +1430,7 @@
   }
 
   /** Touches de jeu, dans l'ordre des pistes. */
-  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'a', 'z'];
+  const KEYS = [...'1234567890', '-', '=', ...'azertyuiopqsdfghjklmwxcvbn'];
 
   // ---------------------------------------------------------------- carnet partagé
 
@@ -1936,11 +1563,6 @@
     ui.saveForm.addEventListener('submit', saveShared);
     loadShared();
 
-    ui.modeSamples.addEventListener('click', () => setMode('samples'));
-    ui.modeSynth.addEventListener('click', () => setMode('synth'));
-    let savedMode = 'samples';
-    try { savedMode = localStorage.getItem(MODE_KEY) === 'synth' ? 'synth' : 'samples'; } catch (e) { /* sans mémoire */ }
-    setMode(savedMode);
     fetchSamples();
   }
 

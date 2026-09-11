@@ -68,38 +68,48 @@ page et se recharge d'un clic (mesure, tempo, swing, cases).
 Le carnet est un fichier JSON sur le volume `patterns` (`/data/patterns.json`). Il n'y a
 ni compte ni suppression : c'est un cahier ouvert.
 
-## Sons : échantillons ou synthèse
+## Sons : uniquement des enregistrements
 
-Interrupteur dans la barre de commandes. En mode **Échantillons** (défaut), douze pistes jouent
-de vrais enregistrements (`site/samples/*.mp3`, mono, 96 kb/s, moins de 1,2 s), plusieurs
-prises par instrument tirées au hasard, taux de lecture ajusté. Lanbi et cuivres restent
-synthétisés (souffle).
+Il n'y a plus de synthèse. Chaque piste joue un ou plusieurs enregistrements
+(`site/samples/*.mp3`, mono, 96 kb/s, moins de 1,2 s), tirés au hasard à chaque coup, avec
+un taux de lecture ajusté (`rate`) et parfois une durée coupée (`cut`). La table `SAMPLES`
+dans `site/index.html` fait foi. Le champ `role` de chaque piste dit ce qui est réellement
+enregistré quand l'instrument martiniquais n'existe pas en licence libre.
 
-| Piste | Fichiers | Source |
-|---|---|---|
-| Tanbou bèlè | conga open, tumbadora open, djembé | Freesound `fs_*`, Philharmonia `ph_*` |
-| Tanbou répondeur | quinto slap, quinto open, bongo hi slap | Freesound |
-| Tambour di bass | tumbadora ralentie, drum_bass_hard | Freesound, Sonic Pi |
-| Débonda | bongo low, bongo hi | Freesound |
-| Tibwa | woodblock, elec_wood | Philharmonia, Sonic Pi |
-| Chacha | cabasa | Philharmonia |
-| Baril | tom hi, bongo low | Sonic Pi, Freesound |
-| Siyak | güiro gratté, güiro frappé | Philharmonia |
-| Cloche | cowbell (étouffée, ouverte), drum_cowbell | Philharmonia, Sonic Pi |
-| Kick / snare bouyon | bd_808, sn_dolf | Sonic Pi |
-| Contretemps | drum_cymbal_open | Sonic Pi |
+Trente-six pistes, par famille :
+
+- **Peaux — tambours traditionnels** : tanbou bèlè, tanbou répondeur, tambour di bass, tanbou
+  débonda, tanbou baril, ka (gwoka)
+- **Peaux — orchestre** : conga, tumbadora, quinto, bongos, timbales, djembé
+- **Batterie** : grosse caisse 808, grosse caisse, caisse claire, tom, charley fermé, charley
+  ouvert (contretemps)
+- **Bois** : tibwa, ti-bwa bambou, claves
+- **Métal** : cloche de carnaval, campana
+- **Secoués et grattés** : chacha, siyak, güiro, shaker
+- **Vents et appels** : konn lanbi, flûte des mornes, clarinette, saxophone, trompette, trombone
+- **Cordes** : banjo, guitare, contrebasse
+
+Les instruments mélodiques jouent une note fixe (do 4 pour clarinette, saxophone, trompette,
+trombone ; do 5 pour la flûte ; do 4 et sol 3 pour le banjo ; mi 3 pour la guitare ; la 2
+pincé pour la contrebasse). Les familles se replient d'un clic sur leur nom.
 
 Sources et licences :
 
-- `fs_*` : pack « Bongos and Conga Hits » de MrRentAPercussionist, Freesound, **CC BY 4.0**
-  (https://freesound.org/people/MrRentAPercussionist/packs/25693/). Attribution obligatoire :
-  elle figure en bas de page.
-- `ph_*` : Philharmonia Orchestra sound samples (https://philharmonia.co.uk/resources/sound-samples/).
-  Usage libre, y compris commercial ; interdiction de les revendre « en l'état » comme banque.
-- autres : banque de Sonic Pi (`etc/samples`), échantillons Freesound placés dans le domaine
-  public, **CC0**.
+- `fs_conga_open`, `fs_tumba_open`, `fs_quinto_*`, `fs_bongo_*` : pack « Bongos and Conga Hits »
+  de MrRentAPercussionist, Freesound, **CC BY 4.0**
+  (https://freesound.org/people/MrRentAPercussionist/packs/25693/). Attribution en bas de page.
+- `fs_conch` : « Conch.wav » de RoofDog, Freesound, **CC0** (https://freesound.org/s/78974/).
+- `ph_*` : Philharmonia Orchestra sound samples (https://philharmonia.co.uk/resources/sound-samples/,
+  miroir fichier par fichier : https://github.com/skratchdot/philharmonia-samples). Usage libre,
+  y compris commercial ; interdiction de les revendre « en l'état » comme banque.
+- autres (`bd_808`, `sn_dolf`, `drum_*`, `elec_wood`) : banque de Sonic Pi (`etc/samples`),
+  échantillons Freesound placés dans le domaine public, **CC0**.
 
 Conversion : `ffmpeg -t 1.2 -ac 1 -ar 44100 -af silenceremove,afade,alimiter -b:a 96k`.
+
+Manque en licence libre, non trouvé : violon (Malavoi), accordéon (chouval bwa, mazurka),
+et les vrais tanbou bèlè, tibwa, chacha, siyak. La voie propre reste d'enregistrer un tanbouyé
+et de verser les coups dans `site/samples/`.
 
 Banques explorées et écartées : le kit gwoka `matthCorvo/Mon-GWOKA-Drum-kit` (aucune licence,
 sons apparemment extraits de vidéos), Wikimedia Commons (enregistrements d'ensemble, pas de

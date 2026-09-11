@@ -23,10 +23,8 @@ PORT = int(os.environ.get('PORT', '80'))
 MAX_PATTERNS = 500          # au-delà, les plus anciens sortent du carnet
 MAX_BODY = 16 * 1024        # un motif pèse moins d'un kilo-octet
 NAME_RE = re.compile(r'^[\w\s\'’.\-!?àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]{1,40}$')
-TRACK_IDS = {
-    'tanbouGrave', 'tanbouAigu', 'tambourBass', 'debonda', 'tibwa', 'chacha',
-    'baril', 'siyak', 'cloche', 'lanbi', 'cuivres', 'kickBouyon', 'snareBouyon', 'contretemps',
-}
+TRACK_ID_RE = re.compile(r'^[A-Za-z][A-Za-z0-9_]{0,31}$')   # identifiant de piste, côté page
+MAX_TRACKS = 64
 
 _lock = threading.Lock()
 
@@ -68,8 +66,8 @@ def _validate(body):
     if not isinstance(pattern, dict):
         return None, 'pattern : objet piste -> cases'
     clean = {}
-    for track_id, line in pattern.items():
-        if track_id not in TRACK_IDS:
+    for track_id, line in list(pattern.items())[:MAX_TRACKS]:
+        if not isinstance(track_id, str) or not TRACK_ID_RE.match(track_id):
             continue
         if not isinstance(line, list) or len(line) != steps:
             return None, f'pattern.{track_id} : {steps} cases attendues'
