@@ -1018,6 +1018,16 @@
   }
 
   /**
+   * Dévie légèrement une valeur pour que deux coups identiques ne sonnent pas pareil.
+   * @param {number} base valeur nominale
+   * @param {number} spread amplitude relative de la déviation
+   * @returns {number} valeur déviée
+   */
+  function detune(base, spread) {
+    return base * (1 - spread / 2 + Math.random() * spread);
+  }
+
+  /**
    * Joue un enregistrement de la piste, s'il est prêt.
    * @returns {boolean} faux si l'échantillon n'est pas encore décodé (le coup est perdu)
    */
