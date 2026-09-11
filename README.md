@@ -24,10 +24,16 @@ bruit filtré, enveloppes percussives), groupés par formation d'origine.
 - `lanbi` — Konn lanbi, conque servant autrefois de signal
 - `cuivres` — trombone de défilé
 
+**Bouyon — électro**
+
+- `kickBouyon` — grosse caisse électronique
+- `snareBouyon` — caisse claire électronique, claquante
+
 ## Rythmes
 
-Bèlè (2 temps), Beliyà / Gran bèlè (3 temps), Danmyé / Ladja, Chouval bwa, Biguine,
-Mazouk créole (3 temps), Zouk, Vidé / Karnaval, Groupe à pied.
+Bèlè — tak pi tak pi tak tak (3 temps), Bèlè (2 temps), Beliyà / Gran bèlè (3 temps),
+Danmyé / Ladja, Chouval bwa, Biguine, Mazouk créole (3 temps), Zouk, Vidé / Karnaval,
+Groupe à pied, Bouyon (2 temps, 160 BPM, kick électro sur la roulade du lapo kabwit).
 
 La grille s'adapte à la mesure : 16 pas en deux temps, 12 pas en trois temps
 (beliyà, gran bèlè et mazouk sont à trois temps).

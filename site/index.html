@@ -395,8 +395,8 @@
 <div class="wrap">
   <header>
     <h1>Boîte à <span>rythme</span> — Matinik</h1>
-    <p>Percussions traditionnelles martiniquaises synthétisées en direct : bèlè, chouval bwa, biguine, mazouk, et les groupes à pied du carnaval.<br>
-       Aucun échantillon à télécharger — les onze timbres sont fabriqués par la Web Audio API.</p>
+    <p>Percussions martiniquaises synthétisées en direct : bèlè, chouval bwa, biguine, mazouk, les groupes à pied du carnaval, et le bouyon.<br>
+       Aucun échantillon à télécharger — les treize timbres sont fabriqués par la Web Audio API.</p>
   </header>
 
   <div class="transport">
@@ -437,7 +437,7 @@
   </section>
 
   <footer>
-    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case : <em style="color:var(--accent);font-style:normal">tak</em> (fort), second clic : <em style="color:var(--accent);font-style:normal">pi</em> (léger), troisième : silence &nbsp;·&nbsp; touches <kbd>1</kbd>…<kbd>0</kbd> <kbd>-</kbd> jouent les pistes (<kbd>Maj</kbd> pour un coup léger) &nbsp;·&nbsp; <kbd>M</kbd> coupe une piste &nbsp;·&nbsp; le motif reste en mémoire dans ce navigateur.
+    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case : <em style="color:var(--accent);font-style:normal">tak</em> (fort), second clic : <em style="color:var(--accent);font-style:normal">pi</em> (léger), troisième : silence &nbsp;·&nbsp; touches <kbd>1</kbd>…<kbd>0</kbd> <kbd>-</kbd> <kbd>=</kbd> jouent les pistes (<kbd>Maj</kbd> pour un coup léger) &nbsp;·&nbsp; <kbd>M</kbd> coupe une piste &nbsp;·&nbsp; le motif reste en mémoire dans ce navigateur.
     <div class="note">
       <strong>D'où viennent ces sons.</strong> Le <em>tanbou bèlè</em> a un fût de lattes de tonneau de rhum et une peau de cabri ; sa sonorité recherchée est « proche de la terre, un peu sourde », et le talon de pied frotté sur la peau le rend mélodique — d'où les légers glissements de hauteur d'un coup à l'autre. Les <em>tibwa</em> sont deux baguettes de bois frappées sur le fût : elles donnent le tempo de base, le tambour se contente d'accentuer et de répondre. Le <em>chacha</em> est une calebasse séchée remplie de graines, ou une boîte de fer-blanc. Le <em>tanbou débonda</em> et le <em>ti-bwa</em> en bambou viennent du chouval bwa. Le <em>beliyà</em> et le <em>gran bèlè</em> sont les deux formes de bèlè à trois temps, comme la mazouk — d'où la grille à 12 pas.
       <br>
@@ -468,6 +468,8 @@
     { id: 'cloche',      label: 'Cloche',           role: 'métal de parade',       color: '#c9a227', level: 0.50, group: 'Carnaval — groupes à pied' },
     { id: 'lanbi',       label: 'Konn lanbi',       role: 'conque — appel',        color: '#e8a9a0', level: 0.45, group: 'Carnaval — groupes à pied' },
     { id: 'cuivres',     label: 'Cuivres',          role: 'trombone de défilé',    color: '#ffcf5c', level: 0.40, group: 'Carnaval — groupes à pied' },
+    { id: 'kickBouyon',  label: 'Kick bouyon',      role: 'grosse caisse électro', color: '#ff6b57', level: 0.95, group: 'Bouyon — électro' },
+    { id: 'snareBouyon', label: 'Snare bouyon',     role: 'caisse claire électro', color: '#f7d774', level: 0.70, group: 'Bouyon — électro' },
   ];
 
   /**
@@ -619,6 +621,23 @@
       cloche:      'x...x.x.x...x.x.',
       lanbi:       'x.......x.......',
       cuivres:     '....x.......x...',
+    },
+    'Bouyon (2 temps)': {
+      bpm: 160, steps: 16,
+      dit: 'boum · ka · boum boum · ka — le lapo kabwit roule dessous',
+      kickBouyon:  'x...x...x.x.x...',
+      snareBouyon: '....x.......x.p.',
+      tanbouGrave: 'x..x..x.x..x..x.',
+      tanbouAigu:  '..p.x.p...p.x.p.',
+      tambourBass: 'x.......x.......',
+      debonda:     '................',
+      tibwa:       'x.x.xx.x.x.xx.x.',
+      chacha:      'xpxpxpxpxpxpxpxp',
+      baril:       '................',
+      siyak:       '..x...x...x...x.',
+      cloche:      'x..x..x...x.x...',
+      lanbi:       '............x...',
+      cuivres:     '......x.......x.',
     },
     'Vide': {
       bpm: 96, steps: 12,
@@ -1120,7 +1139,57 @@
     noiseSource(t, 0.1).connect(breath).connect(out);
   }
 
+  /**
+   * Kick bouyon : grosse caisse électronique, chute de hauteur rapide et longue queue grave.
+   * @param {number} t date du coup
+   * @param {AudioNode} out sortie de la piste
+   * @param {number} v intensité
+   */
+  function kickBouyon(t, out, v) {
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(150, t);
+    osc.frequency.exponentialRampToValueAtTime(44, t + 0.09);
+    envelope(g, t, v * 1.2, 0.002, 0.42);
+    osc.connect(g).connect(out);
+    osc.start(t);
+    osc.stop(t + 0.55);
+
+    const click = ctx.createGain();
+    envelope(click, t, v * 0.35, 0.0005, 0.012);
+    noiseSource(t, 0.03).connect(click).connect(out);
+  }
+
+  /**
+   * Snare bouyon : caisse claire électronique, claquante et brève.
+   * @param {number} t date du coup
+   * @param {AudioNode} out sortie de la piste
+   * @param {number} v intensité
+   */
+  function snareBouyon(t, out, v) {
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 2200;
+    bp.Q.value = 0.9;
+    const snap = ctx.createGain();
+    envelope(snap, t, v * 0.8, 0.001, 0.13);
+    noiseSource(t, 0.2).connect(bp).connect(snap).connect(out);
+
+    const osc = ctx.createOscillator();
+    const g = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(238, t);
+    osc.frequency.exponentialRampToValueAtTime(170, t + 0.06);
+    envelope(g, t, v * 0.55, 0.001, 0.08);
+    osc.connect(g).connect(out);
+    osc.start(t);
+    osc.stop(t + 0.16);
+  }
+
   const VOICES = {
+    kickBouyon,
+    snareBouyon,
     tanbouGrave,
     tanbouAigu,
     tambourBass,
@@ -1486,7 +1555,7 @@
   }
 
   /** Touches de jeu, dans l'ordre des pistes. */
-  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-'];
+  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
 
   // ---------------------------------------------------------------- carnet partagé
 
