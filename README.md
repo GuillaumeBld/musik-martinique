@@ -70,14 +70,41 @@ ni compte ni suppression : c'est un cahier ouvert.
 
 ## Sons : échantillons ou synthèse
 
-Interrupteur dans la barre de commandes. En mode **Échantillons** (défaut), dix pistes jouent
-de vrais enregistrements (`site/samples/*.mp3`, mono, 96 kb/s, moins de 1,2 s) : tablas pour
-les tanbou, toms pour débonda et baril, cowbell, 808 et caisse claire pour le bouyon, cymbale
-ouverte pour le contretemps. Plusieurs prises par instrument, tirées au hasard, avec un taux de
-lecture ajusté. Chacha, siyak, lanbi et cuivres restent synthétisés (bruit et souffle).
+Interrupteur dans la barre de commandes. En mode **Échantillons** (défaut), douze pistes jouent
+de vrais enregistrements (`site/samples/*.mp3`, mono, 96 kb/s, moins de 1,2 s), plusieurs
+prises par instrument tirées au hasard, taux de lecture ajusté. Lanbi et cuivres restent
+synthétisés (souffle).
 
-Origine des fichiers : banque de Sonic Pi (`etc/samples`), échantillons Freesound placés dans
-le domaine public (CC0). Conversion : `ffmpeg -t 1.2 -ac 1 -ar 44100 -b:a 96k`.
+| Piste | Fichiers | Source |
+|---|---|---|
+| Tanbou bèlè | conga open, tumbadora open, djembé | Freesound `fs_*`, Philharmonia `ph_*` |
+| Tanbou répondeur | quinto slap, quinto open, bongo hi slap | Freesound |
+| Tambour di bass | tumbadora ralentie, drum_bass_hard | Freesound, Sonic Pi |
+| Débonda | bongo low, bongo hi | Freesound |
+| Tibwa | woodblock, elec_wood | Philharmonia, Sonic Pi |
+| Chacha | cabasa | Philharmonia |
+| Baril | tom hi, bongo low | Sonic Pi, Freesound |
+| Siyak | güiro gratté, güiro frappé | Philharmonia |
+| Cloche | cowbell (étouffée, ouverte), drum_cowbell | Philharmonia, Sonic Pi |
+| Kick / snare bouyon | bd_808, sn_dolf | Sonic Pi |
+| Contretemps | drum_cymbal_open | Sonic Pi |
+
+Sources et licences :
+
+- `fs_*` : pack « Bongos and Conga Hits » de MrRentAPercussionist, Freesound, **CC BY 4.0**
+  (https://freesound.org/people/MrRentAPercussionist/packs/25693/). Attribution obligatoire :
+  elle figure en bas de page.
+- `ph_*` : Philharmonia Orchestra sound samples (https://philharmonia.co.uk/resources/sound-samples/).
+  Usage libre, y compris commercial ; interdiction de les revendre « en l'état » comme banque.
+- autres : banque de Sonic Pi (`etc/samples`), échantillons Freesound placés dans le domaine
+  public, **CC0**.
+
+Conversion : `ffmpeg -t 1.2 -ac 1 -ar 44100 -af silenceremove,afade,alimiter -b:a 96k`.
+
+Banques explorées et écartées : le kit gwoka `matthCorvo/Mon-GWOKA-Drum-kit` (aucune licence,
+sons apparemment extraits de vidéos), Wikimedia Commons (enregistrements d'ensemble, pas de
+coups isolés). Aucun échantillon libre de tanbou bèlè, tibwa ou chacha martiniquais n'a été
+trouvé : la voie propre serait d'enregistrer un tanbouyé et de verser les coups ici.
 
 ## Portée
 

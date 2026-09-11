@@ -463,7 +463,7 @@
       <br>
       <strong>Le carnaval.</strong> Dans un <em>groupe à pied</em> — l'orchestre de rue des vidés — la base est le tambour, souvent un <em>baril</em> de récupération, plus clair et plus mordant que le tanbou bèlè. S'y ajoutent le <em>ti-bwa</em>, le <em>cha-cha</em>, la <em>cloche</em>, le <em>siyak</em> (une grande râpe de bois ou de métal que l'on gratte d'une baguette), la <em>conque de lambi</em> qui servait autrefois de signal, et selon les groupes des <em>cuivres</em> — trompette et trombone.
       <br>
-      <strong>Deux sources de son.</strong> En mode <em>Échantillons</em>, les peaux, le bois, la cloche et le kit bouyon jouent de vrais enregistrements (domaine public, CC0, Freesound via la banque de Sonic Pi) : une tabla ralentie tient le rôle du tanbou, des toms celui du débonda et du baril. Chacha, siyak, lanbi et cuivres restent synthétisés. En mode <em>Synthèse</em>, tout est fabriqué par la Web Audio API : chaque timbre cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
+      <strong>Deux sources de son.</strong> En mode <em>Échantillons</em>, douze pistes jouent de vrais enregistrements : congas et bongos pour les tanbou et le débonda (« Bongos and Conga Hits » de MrRentAPercussionist sur Freesound, CC BY 4.0), djembé, bloc de bois, cabasa, güiro et cowbell des <em>Philharmonia Orchestra sound samples</em>, 808, caisse claire, toms et cymbale de la banque de Sonic Pi (CC0). Une tumbadora ralentie tient le tambour di bass, le güiro tient le siyak. Lanbi et cuivres restent synthétisés. En mode <em>Synthèse</em>, tout est fabriqué par la Web Audio API : chaque timbre cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
     </div>
   </footer>
 </div>
@@ -1345,13 +1345,17 @@
    * Les pistes absentes ici restent en synthèse : bruit et souffle y sont plus vrais.
    */
   const SAMPLES = {
-    tanbouGrave: { files: ['tabla_ghe1', 'tabla_ghe3', 'tabla_ghe5'], rate: 0.72, gain: 1.4 },
-    tanbouAigu:  { files: ['tabla_na', 'tabla_tun1', 'tabla_tun2', 'tabla_te1'], rate: 0.9, gain: 1.0 },
-    tambourBass: { files: ['drum_bass_hard'], rate: 0.8, gain: 1.3 },
-    debonda:     { files: ['drum_tom_lo_soft', 'drum_tom_lo_hard'], rate: 1.05, gain: 1.0 },
-    tibwa:       { files: ['elec_wood', 'tabla_ke1'], rate: 1.35, gain: 0.8, cut: 0.18 },
-    baril:       { files: ['drum_tom_hi_hard'], rate: 1.15, gain: 1.0 },
-    cloche:      { files: ['drum_cowbell'], rate: 1.0, gain: 0.8 },
+    // fs_* : « Bongos and Conga Hits », MrRentAPercussionist, Freesound, CC BY 4.0
+    // ph_* : Philharmonia Orchestra sound samples · autres : banque Sonic Pi, CC0
+    tanbouGrave: { files: ['fs_conga_open', 'fs_tumba_open', 'ph_djembe'], rate: 0.86, gain: 1.2 },
+    tanbouAigu:  { files: ['fs_quinto_slap', 'fs_quinto_open', 'fs_bongo_hi_slap'], rate: 1.0, gain: 0.95 },
+    tambourBass: { files: ['fs_tumba_open', 'drum_bass_hard'], rate: 0.66, gain: 1.4 },
+    debonda:     { files: ['fs_bongo_low', 'fs_bongo_hi'], rate: 0.95, gain: 1.0 },
+    tibwa:       { files: ['ph_woodblock', 'elec_wood'], rate: 1.25, gain: 0.8, cut: 0.18 },
+    chacha:      { files: ['ph_cabasa'], rate: 1.1, gain: 0.7, cut: 0.22 },
+    baril:       { files: ['drum_tom_hi_hard', 'fs_bongo_low'], rate: 1.2, gain: 1.0 },
+    siyak:       { files: ['ph_guiro_scraped', 'ph_guiro_struck'], rate: 1.0, gain: 0.8, cut: 0.4 },
+    cloche:      { files: ['ph_cowbell_damped', 'ph_cowbell_open', 'drum_cowbell'], rate: 1.0, gain: 0.75 },
     kickBouyon:  { files: ['bd_808'], rate: 1.0, gain: 1.3 },
     snareBouyon: { files: ['sn_dolf'], rate: 1.0, gain: 0.9 },
     contretemps: { files: ['drum_cymbal_open'], rate: 1.2, gain: 0.6, cut: 0.32 },
