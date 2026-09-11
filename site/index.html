@@ -443,7 +443,7 @@
       <br>
       <strong>Le carnaval.</strong> Dans un <em>groupe à pied</em> — l'orchestre de rue des vidés — la base est le tambour, souvent un <em>baril</em> de récupération, plus clair et plus mordant que le tanbou bèlè. S'y ajoutent le <em>ti-bwa</em>, le <em>cha-cha</em>, la <em>cloche</em>, le <em>siyak</em> (une grande râpe de bois ou de métal que l'on gratte d'une baguette), la <em>conque de lambi</em> qui servait autrefois de signal, et selon les groupes des <em>cuivres</em> — trompette et trombone.
       <br>
-      <strong>Ce que ce n'est pas :</strong> des enregistrements. Chaque timbre est une synthèse qui cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel.
+      <strong>Ce que ce n'est pas :</strong> des enregistrements. Chaque timbre est une synthèse qui cherche le comportement de l'instrument, pas sa reproduction. Les motifs sont des interprétations stylistiques, pas des transcriptions du répertoire traditionnel. Les entrées « d'après des morceaux connus » reprennent seulement la pulsation de batterie telle qu'on la ressent à l'écoute : ni mélodie, ni paroles, ni relevé exact.
     </div>
   </footer>
 </div>
@@ -642,6 +642,96 @@
       cloche:      'x..x..x...x.x...',
       lanbi:       '............x...',
       cuivres:     '......x.......x.',
+    },
+    // ---- D'après des morceaux connus : la pulsation batterie, pas la mélodie ni les paroles.
+    'Kassav\' — Zouk la sé sel médikaman nou ni (1984)': {
+      song: true, bpm: 126, steps: 16,
+      dit: 'zouk : kick sur chaque temps, contretemps ouvert, tibwa syncopé',
+      kickBouyon:  'x...x...x...x...',
+      snareBouyon: '....x.......x...',
+      contretemps: '..x...x...x...x.',
+      chacha:      'x.x.x.x.x.x.x.x.',
+      tibwa:       'x.x..x.x.x..x.x.',
+      tanbouAigu:  '......p.......p.',
+      cloche:      '......x.......x.',
+      cuivres:     '..........x...x.',
+    },
+    'Kassav\' — Syé bwa (1987)': {
+      song: true, bpm: 132, steps: 16,
+      dit: 'zouk chaud : kick qui pousse, tibwa roulé',
+      kickBouyon:  'x.....x.x.....x.',
+      snareBouyon: '....x.......x.p.',
+      contretemps: '..x...x...x...x.',
+      chacha:      'xpxpxpxpxpxpxpxp',
+      tibwa:       'x.x.xx.x.x.xx.x.',
+      tanbouGrave: 'x.......x.......',
+      cloche:      'x...x...x...x...',
+      cuivres:     '......x.........',
+    },
+    'Jocelyne Béroard & Philippe Lavil — Kolé séré (1987)': {
+      song: true, bpm: 100, steps: 16,
+      dit: 'zouk love : lent, aéré, contretemps léger',
+      kickBouyon:  'x.......x.....x.',
+      snareBouyon: '....x.......x...',
+      contretemps: '..p...p...p...p.',
+      chacha:      'x.x.x.x.x.x.x.x.',
+      tanbouAigu:  '.....p.......x.p',
+      tibwa:       '..x...x.x.x...x.',
+    },
+    'Kali — Monté la riviè (1992)': {
+      song: true, bpm: 118, steps: 16,
+      dit: 'biguine-zouk au banjo : cloche et chacha portent la danse',
+      tambourBass: 'x.......x.......',
+      tanbouGrave: 'x.....x.x.......',
+      tanbouAigu:  '..p.x.....p.x...',
+      tibwa:       '..x...x...x...x.',
+      chacha:      'x.x.x.x.x.x.x.x.',
+      cloche:      '....x.......x...',
+      contretemps: '..p...p...p...p.',
+    },
+    'Malavoi — Caressé mwen (1984)': {
+      song: true, bpm: 132, steps: 12,
+      dit: 'mazouk : trois temps, le deuxième appuyé',
+      tambourBass: 'x...........',
+      tanbouGrave: '....x...p...',
+      debonda:     'x...x...x...',
+      tibwa:       'x.p.x.p.x.x.',
+      chacha:      'p.p.p.p.p.p.',
+      cloche:      '....x.......',
+    },
+    'Eugène Mona — Bwa brilé (1975)': {
+      song: true, bpm: 112, steps: 16,
+      dit: 'bèlè : tak pi tak pi tak tak sous la flûte des mornes',
+      tanbouGrave: 'x.....x...x.....',
+      tanbouAigu:  '..p..x..p...x.p.',
+      tambourBass: 'x.......x.......',
+      tibwa:       'x.p.x.p.x.x.p.p.',
+      chacha:      'p.p.p.p.p.p.p.p.',
+      debonda:     '....x.......x...',
+    },
+    'Dédé Saint-Prix — Mi sé sa (chouval bwa)': {
+      song: true, bpm: 144, steps: 16,
+      dit: 'chouval bwa : tibwa qui galope, débonda qui répond',
+      debonda:     'x...x...x...x...',
+      tanbouGrave: '....x.......x...',
+      tanbouAigu:  '..x...x...x...x.',
+      tibwa:       'x.xxx.xxx.xxx.xx',
+      chacha:      '..x...x...x...x.',
+      siyak:       '......x.......x.',
+    },
+    'Plastic System Band — vidé (carnaval)': {
+      song: true, bpm: 150, steps: 16,
+      dit: 'groupe à pied : baril, cloche et lanbi qui appelle',
+      baril:       'x.xx..x.x.xx..x.',
+      tanbouGrave: 'x..x..x...x..x..',
+      tanbouAigu:  '..x..x..x..x..x.',
+      tambourBass: 'x.......x.......',
+      tibwa:       'x.xxx.xxx.xxx.xx',
+      chacha:      'x.x.x.x.x.x.x.x.',
+      siyak:       '..x...x...x...x.',
+      cloche:      'x...x.x.x...x.x.',
+      lanbi:       'x.......x.......',
+      cuivres:     '....x.......x...',
     },
     'Vide': {
       bpm: 96, steps: 12,
@@ -1537,12 +1627,17 @@
   }
 
   function bindControls() {
+    const styles = document.createElement('optgroup');
+    styles.label = 'Styles';
+    const songs = document.createElement('optgroup');
+    songs.label = 'D’après des morceaux connus';
     for (const name of Object.keys(PRESETS)) {
       const option = document.createElement('option');
       option.value = name;
       option.textContent = name;
-      ui.preset.append(option);
+      (PRESETS[name].song ? songs : styles).append(option);
     }
+    ui.preset.append(styles, songs);
     ui.preset.addEventListener('change', () => applyPreset(ui.preset.value));
 
     ui.clear.addEventListener('click', () => {

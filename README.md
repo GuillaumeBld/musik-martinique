@@ -36,6 +36,11 @@ Bèlè — tak pi tak pi tak tak (3 temps), Bèlè (2 temps), Beliyà / Gran bè
 Danmyé / Ladja, Chouval bwa, Biguine, Mazouk créole (3 temps), Zouk, Vidé / Karnaval,
 Groupe à pied, Bouyon (2 temps, 160 BPM, kick électro sur la roulade du lapo kabwit).
 
+**D'après des morceaux connus** (pulsation batterie seulement, ni mélodie ni paroles ni relevé
+exact) : Kassav' « Zouk la sé sel médikaman nou ni » et « Syé bwa », Béroard & Lavil « Kolé
+séré », Kali « Monté la riviè », Malavoi « Caressé mwen », Eugène Mona « Bwa brilé », Dédé
+Saint-Prix « Mi sé sa », Plastic System Band (vidé).
+
 La grille s'adapte à la mesure : 16 pas en deux temps, 12 pas en trois temps
 (beliyà, gran bèlè et mazouk sont à trois temps).
 
