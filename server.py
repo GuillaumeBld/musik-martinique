@@ -25,7 +25,7 @@ MAX_BODY = 16 * 1024        # un motif pèse moins d'un kilo-octet
 NAME_RE = re.compile(r'^[\w\s\'’.\-!?àâäéèêëîïôöùûüçÀÂÄÉÈÊËÎÏÔÖÙÛÜÇ]{1,40}$')
 TRACK_IDS = {
     'tanbouGrave', 'tanbouAigu', 'tambourBass', 'debonda', 'tibwa', 'chacha',
-    'baril', 'siyak', 'cloche', 'lanbi', 'cuivres', 'kickBouyon', 'snareBouyon',
+    'baril', 'siyak', 'cloche', 'lanbi', 'cuivres', 'kickBouyon', 'snareBouyon', 'contretemps',
 }
 
 _lock = threading.Lock()

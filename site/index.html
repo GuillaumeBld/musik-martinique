@@ -396,7 +396,7 @@
   <header>
     <h1>Boîte à <span>rythme</span> — Matinik</h1>
     <p>Percussions martiniquaises synthétisées en direct : bèlè, chouval bwa, biguine, mazouk, les groupes à pied du carnaval, et le bouyon.<br>
-       Aucun échantillon à télécharger — les treize timbres sont fabriqués par la Web Audio API.</p>
+       Aucun échantillon à télécharger — les quatorze timbres sont fabriqués par la Web Audio API.</p>
   </header>
 
   <div class="transport">
@@ -437,7 +437,7 @@
   </section>
 
   <footer>
-    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case : <em style="color:var(--accent);font-style:normal">tak</em> (fort), second clic : <em style="color:var(--accent);font-style:normal">pi</em> (léger), troisième : silence &nbsp;·&nbsp; touches <kbd>1</kbd>…<kbd>0</kbd> <kbd>-</kbd> <kbd>=</kbd> jouent les pistes (<kbd>Maj</kbd> pour un coup léger) &nbsp;·&nbsp; <kbd>M</kbd> coupe une piste &nbsp;·&nbsp; le motif reste en mémoire dans ce navigateur.
+    <kbd>Espace</kbd> lecture / pause &nbsp;·&nbsp; clic sur une case : <em style="color:var(--accent);font-style:normal">tak</em> (fort), second clic : <em style="color:var(--accent);font-style:normal">pi</em> (léger), troisième : silence &nbsp;·&nbsp; les touches affichées à côté de chaque piste la jouent (<kbd>Maj</kbd> pour un coup léger) &nbsp;·&nbsp; <kbd>M</kbd> coupe une piste &nbsp;·&nbsp; le motif reste en mémoire dans ce navigateur.
     <div class="note">
       <strong>D'où viennent ces sons.</strong> Le <em>tanbou bèlè</em> a un fût de lattes de tonneau de rhum et une peau de cabri ; sa sonorité recherchée est « proche de la terre, un peu sourde », et le talon de pied frotté sur la peau le rend mélodique — d'où les légers glissements de hauteur d'un coup à l'autre. Les <em>tibwa</em> sont deux baguettes de bois frappées sur le fût : elles donnent le tempo de base, le tambour se contente d'accentuer et de répondre. Le <em>chacha</em> est une calebasse séchée remplie de graines, ou une boîte de fer-blanc. Le <em>tanbou débonda</em> et le <em>ti-bwa</em> en bambou viennent du chouval bwa. Le <em>beliyà</em> et le <em>gran bèlè</em> sont les deux formes de bèlè à trois temps, comme la mazouk — d'où la grille à 12 pas.
       <br>
@@ -470,6 +470,7 @@
     { id: 'cuivres',     label: 'Cuivres',          role: 'trombone de défilé',    color: '#ffcf5c', level: 0.40, group: 'Carnaval — groupes à pied' },
     { id: 'kickBouyon',  label: 'Kick bouyon',      role: 'grosse caisse électro', color: '#ff6b57', level: 0.95, group: 'Bouyon — électro' },
     { id: 'snareBouyon', label: 'Snare bouyon',     role: 'caisse claire électro', color: '#f7d774', level: 0.70, group: 'Bouyon — électro' },
+    { id: 'contretemps', label: 'Contretemps',      role: 'charley ouvert sur le « et »', color: '#9fe3ff', level: 0.55, group: 'Bouyon — électro' },
   ];
 
   /**
@@ -582,6 +583,8 @@
     },
     'Zouk (2 temps)': {
       bpm: 128, steps: 16,
+      dit: 'le contretemps ouvre sur chaque « et »',
+      contretemps: '..x...x...x...x.',
       tanbouGrave: '................',
       tanbouAigu:  '..x...x...x...x.',
       tambourBass: 'x...x...x...x...',
@@ -627,6 +630,7 @@
       dit: 'boum · ka · boum boum · ka — le lapo kabwit roule dessous',
       kickBouyon:  'x...x...x.x.x...',
       snareBouyon: '....x.......x.p.',
+      contretemps: '..x...x...x...x.',
       tanbouGrave: 'x..x..x.x..x..x.',
       tanbouAigu:  '..p.x.p...p.x.p.',
       tambourBass: 'x.......x.......',
@@ -1187,9 +1191,41 @@
     osc.stop(t + 0.16);
   }
 
+  /**
+   * Contretemps : charley ouvert électronique, souffle métallique qui s'ouvre sur le « et ».
+   * @param {number} t date du coup
+   * @param {AudioNode} out sortie de la piste
+   * @param {number} v intensité
+   */
+  function contretemps(t, out, v) {
+    const hp = ctx.createBiquadFilter();
+    hp.type = 'highpass';
+    hp.frequency.value = 6500;
+    const g = ctx.createGain();
+    envelope(g, t, v * 0.5, 0.002, 0.24);
+    noiseSource(t, 0.3).connect(hp).connect(g).connect(out);
+
+    const bp = ctx.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = 8200;
+    bp.Q.value = 1.5;
+    const metal = ctx.createGain();
+    envelope(metal, t, v * 0.16, 0.002, 0.2);
+    bp.connect(metal).connect(out);
+    for (const freq of [3130, 4370, 5810]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      osc.connect(bp);
+      osc.start(t);
+      osc.stop(t + 0.26);
+    }
+  }
+
   const VOICES = {
     kickBouyon,
     snareBouyon,
+    contretemps,
     tanbouGrave,
     tanbouAigu,
     tambourBass,
@@ -1555,7 +1591,7 @@
   }
 
   /** Touches de jeu, dans l'ordre des pistes. */
-  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='];
+  const KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', 'a', 'z'];
 
   // ---------------------------------------------------------------- carnet partagé
 

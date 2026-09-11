@@ -28,6 +28,7 @@ bruit filtré, enveloppes percussives), groupés par formation d'origine.
 
 - `kickBouyon` — grosse caisse électronique
 - `snareBouyon` — caisse claire électronique, claquante
+- `contretemps` — charley ouvert sur le « et » de chaque temps (bouyon, zouk)
 
 ## Rythmes
 
